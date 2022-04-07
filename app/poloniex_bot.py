@@ -1,6 +1,7 @@
 import sys
 sys.path.append("..")
 from modules.data.poloniex.poloniex_api import Poloniex as pl
+from modules.strategy.identify_pairs import IdentifyPairs
 
 coin_price_url = "https://poloniex.com/public?command=returnTicker"
 
@@ -9,5 +10,12 @@ class MainPoliniex(pl):
         super().__init__(URL)
 
 if __name__ == "__main__":
-    obj = MainPoliniex(coin_price_url)
-    print(f"Number of Tradeable Coins: {len(obj.coins_tradeable)}")
+    ## Coin list
+    coin_list = MainPoliniex(coin_price_url).coins_tradeable
+    # print(coin_list)
+
+    ## Pairs identification
+    # obj = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"])
+    obj = IdentifyPairs(coin_list, individual_currencies=["BTC", "ETH", "USDT"])
+    print(obj.tradeable_trio)
+
