@@ -15,8 +15,19 @@ if __name__ == "__main__":
     # print(coin_list)
 
     ## Pairs identification
-    # obj = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"])
-    # obj = IdentifyPairs(coin_list, individual_currencies=["BTC", "ETH", "USDT"])
-    obj = IdentifyPairs(coin_list)
-    print(obj.tradeable_trio)
+    print("Obj1: ")
+    obj1 = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"])
+    print(obj1.get_tradeable_trio)
+    print(obj1.get_all_tradeable_trios)
+
+    print("\nObj2: ")
+    obj2 = IdentifyPairs(coin_list, individual_currencies=["BTC", "ETH", "USDT"])
+    print(obj2.get_tradeable_trio)
+    print(obj2.get_all_tradeable_trios)
+
+    print("\nObj3: ")
+    obj3 = IdentifyPairs(coin_list)
+    print(obj3.get_tradeable_trio)
+    print(obj3.get_all_tradeable_trios)
+    
 

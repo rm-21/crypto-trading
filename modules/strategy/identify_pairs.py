@@ -10,12 +10,20 @@ class IdentifyPairs:
         ## Final Pairs
         # 1. If paired_order is there, validate it and see if it is present in the tradeable_pairs list
         # 2. If 1 is false, and individual currencies are present, create trio and check as in 1
-        self.tradeable_trio = self.paired_order if self._check_paired_order() else self.create_tradeable_trio_from_individual()
+        self._tradeable_trio = self.paired_order if self._check_paired_order() else self._create_tradeable_trio_from_individual()
 
         ## Complete List of tradeable pairs
         # If Final Pairs is None OR find_all == True
         # Create all trios based on tradeable_pairs list.
-        self.tradeable_all_pairs = self._create_all_pairs()
+        self._tradeable_all_pairs = self._create_all_pairs()
+
+    @property
+    def get_tradeable_trio(self):
+        return self._tradeable_trio
+
+    @property
+    def get_all_tradeable_trios(self):
+        return self._tradeable_all_pairs
 
     @staticmethod
     def _validate_paired_currency(item: str):
@@ -44,11 +52,11 @@ class IdentifyPairs:
             print("All paired orders are present in the tradeable list.")
             return True
 
-    def create_tradeable_trio_from_individual(self):
+    def _create_tradeable_trio_from_individual(self):
         """
         If paired_order: 
         * is None
-        
+
         Returns: 
         * tradeable_trio: if individual_currencies is not None
         * False: otherwise
@@ -67,6 +75,9 @@ class IdentifyPairs:
         return False
 
     def _create_all_pairs(self):
-        if ((self.paired_order == None) and (self.individual_currencies == None)) or (self.find_all):
+        """
+        To be implemented
+        """
+        if ((self.paired_order == None or self.paired_order == False) and (self.individual_currencies == None)) or (self.find_all):
             pass
         return None
