@@ -4,6 +4,13 @@ import json
 import time
 
 class Poloniex:
+    """
+    Parameters:
+    URL: Link for the API Request
+
+    Methods:
+    coin_list: Returns the list of tradeable coins after filtering for frozen coins.
+    """
     def __init__(self, URL: str):
         self._URL = URL
 
