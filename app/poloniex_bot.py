@@ -48,23 +48,15 @@ if __name__ == "__main__":
     # print()
 
     # Get Structured Pairs
-    with open("structured_triangular_pairs.json") as json_file:
-        structured_pairs = json.load(json_file)
+    def tempFunc():
+        all_pairs = IdentifyPairs(coin_list).get_all_tradeable_trios
+        for t in all_pairs:
+            obj2 = SurfaceArb(t, data_obj.get_price_for_trio(t), 1, t[0].split("_")[0])
+            df = obj2.get_trade_logs
+            if len(df[df["profit"] > 0].index) > 0:
+                print("-" * 100)
+                print(obj2.trio)
+                print(df)
+                print("-" * 100)
 
-    trio_list = []
-    for t_pair in structured_pairs:
-        trio_list.append(t_pair["combined"].split(","))
-
-    for t in trio_list:
-        obj1 = SurfaceArb(t, data_obj.get_price_for_trio(t), 1, t[0].split("_")[0])
-        df = obj1.get_trade_logs
-        if len(df[df["profit"] > 0]) > 0:
-            print("-" * 100)
-            print(obj1.trio)
-            print(df)
-            print("-" * 100)
-
-# BTC   ETH
-# USTD  BTC
-#
-# ETH/USDT
+    tempFunc()

@@ -1,5 +1,6 @@
 from itertools import permutations
 import json
+from collections import defaultdict
 
 
 class IdentifyPairs:
@@ -88,92 +89,53 @@ class IdentifyPairs:
                 return trio
         return False
 
-    def _create_all_pairs(self, dump=True):
-        """
-        To be implemented
-        """
-        if (
-            (self.paired_order == None or self.paired_order == False)
-            and (self.individual_currencies == None)
-        ) or (self.find_all):
-            # Declare Variables
-            triangular_pairs_list = []
-            remove_duplicates_list = []
-            pairs_list = self.tradeable_pairs[0:]
+    def _create_all_pairs(self):
+        tri_pair_list = []
+        pair_dict = defaultdict(list)
+        for pair in self.tradeable_pairs:
+            base, quote = pair.split("_")[0], pair.split("_")[1]
+            pair_dict[base].append(quote)
 
-            # Get Pair A
-            for pair_a in pairs_list:
-                pair_a_split = pair_a.split("_")
-                a_base = pair_a_split[0]
-                a_quote = pair_a_split[1]
+        for k, v in pair_dict.items():
+            for idx1 in range(len(v)):
+                pair_1 = k + "_" + v[idx1]
 
-                # Assign A to a Box
-                a_pair_box = [a_base, a_quote]
+                for idx2 in range(idx1 + 1, len(v)):
+                    temp_pair = []
 
-                # Get Pair B
-                for pair_b in pairs_list:
-                    pair_b_split = pair_b.split("_")
-                    b_base = pair_b_split[0]
-                    b_quote = pair_b_split[1]
+                    temp_pair.append(pair_1)
 
-                    # Check Pair B
-                    if pair_b != pair_a:
-                        if b_base in a_pair_box or b_quote in a_pair_box:
+                    pair_2 = k + "_" + v[idx2]
+                    temp_pair.append(pair_2)
 
-                            # Get Pair C
-                            for pair_c in pairs_list:
-                                pair_c_split = pair_c.split("_")
-                                c_base = pair_c_split[0]
-                                c_quote = pair_c_split[1]
+                    pair_3_itr1 = v[idx1] + "_" + v[idx2]
+                    pair_3_itr2 = v[idx2] + "_" + v[idx1]
 
-                                # Count the number of matching C items
-                                if pair_c != pair_a and pair_c != pair_b:
-                                    combine_all = [pair_a, pair_b, pair_c]
-                                    pair_box = [
-                                        a_base,
-                                        a_quote,
-                                        b_base,
-                                        b_quote,
-                                        c_base,
-                                        c_quote,
-                                    ]
+                    if pair_3_itr1 in self.tradeable_pairs:
+                        temp_pair.append(pair_3_itr1)
+                    elif pair_3_itr2 in self.tradeable_pairs:
+                        temp_pair.append(pair_3_itr2)
 
-                                    counts_c_base = 0
-                                    for i in pair_box:
-                                        if i == c_base:
-                                            counts_c_base += 1
+                    if len(temp_pair) == 3:
+                        tri_pair_list.append(temp_pair)
 
-                                    counts_c_quote = 0
-                                    for i in pair_box:
-                                        if i == c_quote:
-                                            counts_c_quote += 1
+        return tri_pair_list
 
-                                    # Determining Triangular Match
-                                    if (
-                                        counts_c_base == 2
-                                        and counts_c_quote == 2
-                                        and c_base != c_quote
-                                    ):
-                                        combined = pair_a + "," + pair_b + "," + pair_c
-                                        unique_item = "".join(sorted(combine_all))
 
-                                        if unique_item not in remove_duplicates_list:
-                                            match_dict = {
-                                                "a_base": a_base,
-                                                "b_base": b_base,
-                                                "c_base": c_base,
-                                                "a_quote": a_quote,
-                                                "b_quote": b_quote,
-                                                "c_quote": c_quote,
-                                                "pair_a": pair_a,
-                                                "pair_b": pair_b,
-                                                "pair_c": pair_c,
-                                                "combined": combined,
-                                            }
-                                            triangular_pairs_list.append(match_dict)
-                                            remove_duplicates_list.append(unique_item)
+if __name__ == "__main__":
+    ## Boiler
+    import sys
+    from pprint import pprint
 
-            with open("structured_triangular_pairs.json", "w") as fp:
-                json.dump(triangular_pairs_list, fp)
+    sys.path.append("..")
+    from modules.data.poloniex.poloniex_api import Poloniex as pl
+    from modules.strategy.identify_pairs import IdentifyPairs
 
-            return triangular_pairs_list
+    coin_price_url = "https://poloniex.com/public?command=returnTicker"
+    data_obj = pl(coin_price_url)
+
+    coin_list = data_obj.get_coins_tradeable
+
+    ## Main
+    obj = IdentifyPairs(coin_list)
+    print(obj._create_all_pairs())
