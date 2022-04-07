@@ -16,6 +16,8 @@ if __name__ == "__main__":
     main_obj = MainPoliniex(coin_price_url)
     coin_list = main_obj.get_coins_tradeable
     trio = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"]).get_tradeable_trio
+    print(trio)
+    print(main_obj.get_details_for_trio(trio))
     print(main_obj.get_price_for_trio(trio))
     # print(coin_list)
 
