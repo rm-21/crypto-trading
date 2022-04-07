@@ -16,6 +16,7 @@ if __name__ == "__main__":
 
     ## Pairs identification
     # obj = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"])
-    obj = IdentifyPairs(coin_list, individual_currencies=["BTC", "ETH", "USDT"])
+    # obj = IdentifyPairs(coin_list, individual_currencies=["BTC", "ETH", "USDT"])
+    obj = IdentifyPairs(coin_list)
     print(obj.tradeable_trio)
 
