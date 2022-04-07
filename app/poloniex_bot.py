@@ -10,4 +10,4 @@ class MainPoliniex(pl):
 
 if __name__ == "__main__":
     obj = MainPoliniex(coin_price_url)
-    print(obj.coins_tradeable)
+    print(f"Number of Tradeable Coins: {len(obj.coins_tradeable)}")
