@@ -13,6 +13,7 @@ class Poloniex:
     """
     def __init__(self, URL: str):
         self._URL = URL
+        self.coins_tradeable = self._coin_list()
 
     def _get_coin_tickers(self):
         req = requests.get(self._URL)
@@ -28,8 +29,7 @@ class Poloniex:
                 coin_list.append(coin)
         return coin_list
 
-    @property
-    def coin_list(self):
+    def _coin_list(self):
         self._get_coin_tickers()
         return self._collect_tradeables()
          
