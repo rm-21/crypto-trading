@@ -1,4 +1,6 @@
 import sys
+
+from pip import main
 sys.path.append("..")
 from modules.data.poloniex.poloniex_api import Poloniex as pl
 from modules.strategy.identify_pairs import IdentifyPairs
@@ -13,12 +15,16 @@ if __name__ == "__main__":
     ## Coin list
     main_obj = MainPoliniex(coin_price_url)
     coin_list = main_obj.get_coins_tradeable
-    print(coin_list)
+    trio = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"]).get_tradeable_trio
+    print(main_obj.get_price_for_trio(trio))
+    # print(coin_list)
 
     ## Pairs identification
     # print("Obj1: ")
-    obj1 = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"])
-    print(obj1.get_tradeable_trio)
+    # obj1 = IdentifyPairs(coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"])
+    # trio = obj1.get_tradeable_trio
+    # print(trio)
+
     # print(obj1.get_all_tradeable_trios)
 
     # print("\nObj2: ")
