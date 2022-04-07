@@ -13,7 +13,11 @@ class Poloniex:
     """
     def __init__(self, URL: str):
         self._URL = URL
-        self.coins_tradeable = self._coin_list()
+        self._coins_tradeable = self._coin_list()
+
+    @property
+    def get_coins_tradeable(self):
+        return self._coins_tradeable
 
     def _get_coin_tickers(self):
         req = requests.get(self._URL)
