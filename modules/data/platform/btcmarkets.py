@@ -16,7 +16,7 @@ class BTCMarkets:
         return coins_tradeable
 
     @staticmethod
-    def get_details_for_pair(market_id: str, as_dict: bool = True):
+    def get_details_for_pair(market_id: str, as_dict: bool = False):
         """
         Get the base and quote currencies
         """
@@ -117,14 +117,14 @@ if __name__ == "__main__":
     # coins_tradeable = BTCMarkets.get_coins_tradeable()
     # print(coins_tradeable)
 
-    # btc_sgd_df = BTCMarkets.get_details_for_pair("BTC_AUD")
-    # btc_sgd_dict = BTCMarkets.get_details_for_pair("BTC_AUD", as_dict=True)
-    # print(btc_sgd_dict)
+    # btc_aud_df = BTCMarkets.get_details_for_pair("BTC_AUD")
+    # btc_aud_dict = BTCMarkets.get_details_for_pair("BTC_AUD", as_dict=True)
+    # print(btc_aud_df)
 
-    # btc_aud_price = BTCMarkets.get_price_for_pair("BTC_AUD")
-    # btc_aud_price_dict = BTCMarkets.get_price_for_pair("BTC_AUD", as_dict=True)
-    # print(btc_aud_price)
+    btc_aud_price = BTCMarkets.get_price_for_pair("BTC_AUD")
+    btc_aud_price_dict = BTCMarkets.get_price_for_pair("BTC_AUD", as_dict=True)
+    print(btc_aud_price)
 
-    btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
-    btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)
-    print(btc_aud_ob)
+    # btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
+    # btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)
+    # print(btc_aud_ob)
