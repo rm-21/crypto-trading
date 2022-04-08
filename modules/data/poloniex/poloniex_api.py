@@ -1,7 +1,6 @@
 from imp import is_frozen
 import requests
 import json
-import time
 
 class Poloniex:
     """
@@ -11,8 +10,9 @@ class Poloniex:
     Methods:
     coin_list: Returns the list of tradeable coins after filtering for frozen coins.
     """
-    def __init__(self, URL: str):
-        self._URL = URL
+
+    def __init__(self, URL_PRICES: str):
+        self._URL = URL_PRICES
         self._coins_tradeable = self._coin_list()
 
     @property
@@ -48,6 +48,8 @@ class Poloniex:
         "pair_3_bid": float(self.json_resp[pair_3]["highestBid"])
         }
 
+    def get_depth_for_pair(self, contract):
+        return self._get_coin_depth(contract=contract)
 
     def _get_coin_tickers(self):
         req = requests.get(self._URL)
@@ -66,5 +68,31 @@ class Poloniex:
     def _coin_list(self):
         self._get_coin_tickers()
         return self._collect_tradeables()
+
+    def _get_coin_depth(self, contract):
+        URL_DEPTH = f"https://poloniex.com/public?command=returnOrderBook&currencyPair={contract}&depth=20"
+        req = requests.get(URL_DEPTH)
+        json_resp = json.loads(req.text)
+        self.formatted_book_forward, self.formatted_book_reverse = self._format_coin_depth(json_resp)
+        return self.formatted_book_forward, self.formatted_book_reverse
+
+    def _format_coin_depth(self, json_resp):
+        order_book_forward = {"bids": [], "asks": []}
+        for ask_price in json_resp["asks"]:
+            ask_price_converted = float(ask_price[0])
+            ask_price_adjusted = 1 / ask_price_converted if ask_price_converted != 0 else 0
+            ask_adjusted_quantity = float(ask_price[1]) * ask_price_converted
+            order_book_forward["asks"].append([ask_price_adjusted, ask_adjusted_quantity])
+        order_book_forward["bids"] = json_resp["bids"]
+
+        order_book_reverse = {"bids": [], "asks": []}
+        for bid_price in json_resp["bids"]:
+            bid_price_converted = float(bid_price[0])
+            bid_price_adjusted = bid_price_converted if bid_price_converted != 0 else 0
+            bid_adjusted_quantity = float(bid_price[1])
+            order_book_reverse["bids"].append([bid_price_adjusted, bid_adjusted_quantity])
+        order_book_reverse["asks"] = json_resp["asks"]
+
+        return order_book_forward, order_book_reverse
          
     
