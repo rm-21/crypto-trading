@@ -1,7 +1,4 @@
-import itertools
-
 import pandas as pd
-import numpy as np
 import requests
 import json
 pd.set_option('display.max_columns', 20)
