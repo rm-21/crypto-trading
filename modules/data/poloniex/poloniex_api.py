@@ -1,4 +1,3 @@
-from imp import is_frozen
 import requests
 import json
 
