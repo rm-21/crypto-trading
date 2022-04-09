@@ -31,20 +31,6 @@ class BTCMarkets:
         Pull prices for pair from the respective API
         """
         price = BTCMarkets._price_for_pair(market_id)
-        price["marketId"] = market_id
-        price["timestamp"] = pd.to_datetime(price["timestamp"])
-        price = price.astype({
-            "bestBid": float,
-            "bestAsk": float,
-            "lastPrice": float,
-            "volume24h": float,
-            "volumeQte24h": float,
-            "price24h": float,
-            "pricePct24h": float,
-            "low24h": float,
-            "high24h": float
-        })
-
         if as_dict:
             return price.to_dict('list')
         return price
@@ -82,7 +68,7 @@ class BTCMarkets:
     def _details_for_pair(market_id: str):
         coins_tradeable = BTCMarkets._coins_tradeable()
         pair_details = coins_tradeable[coins_tradeable["marketId"] == market_id].copy(deep=True)
-        return pair_details
+        return pair_details[["marketId", "baseAssetName", "quoteAssetName"]].reset_index(drop=True)
 
     @staticmethod
     def _price_for_pair(market_id: str):
@@ -90,7 +76,20 @@ class BTCMarkets:
         req_url = BTCMarkets.BASE_URL + f'/markets/{market_id}/ticker'
         req = requests.get(req_url)
         price = pd.json_normalize(json.loads(req.text))
-        return price
+        price["marketId"] = market_id
+        price["timestamp"] = pd.to_datetime(price["timestamp"])
+        price = price.astype({
+            "bestBid": float,
+            "bestAsk": float,
+            "lastPrice": float,
+            "volume24h": float,
+            "volumeQte24h": float,
+            "price24h": float,
+            "pricePct24h": float,
+            "low24h": float,
+            "high24h": float
+        })
+        return price[["marketId", "bestBid", "bestAsk", "timestamp"]]
 
     @staticmethod
     def _orderbook_for_pair(market_id: str):
@@ -107,10 +106,10 @@ class BTCMarkets:
     def _validate_currency_pair(market_id: str):
         if "_" in market_id:
             if len(market_id.split("_")) != 2:
-                raise ValueError("Currency pair should be of the format <Currency>_Currency")
+                raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
             return market_id.replace("_", "-")
         else:
-            raise ValueError("Currency pair should be of the format <Currency>_Currency")
+            raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
 
 
 if __name__ == "__main__":
@@ -123,7 +122,7 @@ if __name__ == "__main__":
 
     btc_aud_price = BTCMarkets.get_price_for_pair("BTC_AUD")
     btc_aud_price_dict = BTCMarkets.get_price_for_pair("BTC_AUD", as_dict=True)
-    print(btc_aud_price)
+    print(btc_aud_price_dict)
 
     # btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
     # btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)

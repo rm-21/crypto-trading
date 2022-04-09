@@ -30,33 +30,7 @@ class IndependentReserve:
         """
         Pull prices for pair from the respective API
         """
-        base, quote = market_id.split("_")[0].capitalize(), market_id.split("_")[1]
-        price_ = IndependentReserve._price_for_pair(market_id)
-        price = pd.DataFrame({
-            "marketId": market_id,
-            "bestBid": price_["CurrentHighestBidPrice"],
-            "bestAsk": price_["CurrentLowestOfferPrice"],
-            "lastPrice": price_["LastPrice"],
-            "volume24h": price_[f"DayVolume{base}"],
-            "volumeQte24h": price_[f"DayVolume{base}InSecondaryCurrrency"],
-            "price24h": price_["DayAvgPrice"],
-            "low24h": price_["DayLowestPrice"],
-            "high24h": price_["DayHighestPrice"],
-            "timestamp": price_["CreatedTimestampUtc"]
-        })
-
-        price["timestamp"] = pd.to_datetime(price["timestamp"])
-        price = price.astype({
-            "bestBid": float,
-            "bestAsk": float,
-            "lastPrice": float,
-            "volume24h": float,
-            "volumeQte24h": float,
-            "price24h": float,
-            "low24h": float,
-            "high24h": float
-        })
-
+        price = IndependentReserve._price_for_pair(market_id)
         if as_dict:
             return price.to_dict('list')
         return price
@@ -109,11 +83,38 @@ class IndependentReserve:
     @staticmethod
     def _price_for_pair(market_id: str):
         market_id = IndependentReserve._validate_currency_pair(market_id)
-        base, quote = market_id.split("-")[0], market_id.split("-")[1]
+        base, quote = market_id.split("-")[0].capitalize(), market_id.split("-")[1]
+
         req_url = IndependentReserve.BASE_URL + f'/GetMarketSummary?primaryCurrencyCode={base}&secondaryCurrencyCode={quote}'
         req = requests.get(req_url)
         price = pd.json_normalize(json.loads(req.text))
-        return price
+
+        price = pd.DataFrame({
+            "marketId": market_id,
+            "bestBid": price["CurrentHighestBidPrice"],
+            "bestAsk": price["CurrentLowestOfferPrice"],
+            "lastPrice": price["LastPrice"],
+            "volume24h": price[f"DayVolume{base}"],
+            "volumeQte24h": price[f"DayVolume{base}InSecondaryCurrrency"],
+            "price24h": price["DayAvgPrice"],
+            "low24h": price["DayLowestPrice"],
+            "high24h": price["DayHighestPrice"],
+            "timestamp": price["CreatedTimestampUtc"]
+        })
+
+        price["timestamp"] = pd.to_datetime(price["timestamp"])
+        price = price.astype({
+            "bestBid": float,
+            "bestAsk": float,
+            "lastPrice": float,
+            "volume24h": float,
+            "volumeQte24h": float,
+            "price24h": float,
+            "low24h": float,
+            "high24h": float
+        })
+
+        return price[["marketId", "bestBid", "bestAsk", "timestamp"]]
 
     @staticmethod
     def _orderbook_for_pair(market_id: str):
@@ -131,10 +132,10 @@ class IndependentReserve:
     def _validate_currency_pair(market_id: str):
         if "_" in market_id:
             if len(market_id.split("_")) != 2:
-                raise ValueError("Currency pair should be of the format <Currency>_Currency")
+                raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
             return market_id.replace("_", "-")
         else:
-            raise ValueError("Currency pair should be of the format <Currency>_Currency")
+            raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
 
 
 if __name__ == "__main__":
@@ -143,12 +144,12 @@ if __name__ == "__main__":
 
     # btc_sgd_df = IndependentReserve.get_details_for_pair("XBT_SGD")
     # btc_sgd_dict = IndependentReserve.get_details_for_pair("XBT_SGD", as_dict=True)
-    # print(btc_sgd_dict)
+    # print(btc_sgd_df)
 
-    # btc_sgd_price = IndependentReserve.get_price_for_pair("XBT_SGD")
-    # btc_sgd_price_dict = IndependentReserve.get_price_for_pair("XBT_SGD", as_dict=True)
-    # print(btc_sgd_price)
+    btc_sgd_price = IndependentReserve.get_price_for_pair("XBT_SGD")
+    btc_sgd_price_dict = IndependentReserve.get_price_for_pair("XBT_SGD", as_dict=True)
+    print(btc_sgd_price)
 
-    btc_aud_ob = IndependentReserve.get_orderbook_for_pair("BTC_AUD")
+    # btc_aud_ob = IndependentReserve.get_orderbook_for_pair("BTC_AUD")
     # btc_aud_ob_dict = IndependentReserve.get_orderbook_for_pair("BTC_AUD", as_dict=True)
-    print(btc_aud_ob)
+    # print(btc_aud_ob)

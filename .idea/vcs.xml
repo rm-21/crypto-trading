@@ -3,5 +3,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/modules/data/platform/fxcm/RestAPI" vcs="" />
+    <mapping directory="$PROJECT_DIR$/modules/data/platform/oanda/oanda-api-v20" vcs="Git" />
   </component>
 </project>
