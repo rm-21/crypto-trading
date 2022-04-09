@@ -1,9 +1,6 @@
-import pandas as pd
-import requests
-import json
-from oandapyV20 import API
 import oandapyV20.endpoints.pricing as pricing
-import oandapyV20.endpoints.instruments as instruments
+import pandas as pd
+from oandapyV20 import API
 
 pd.set_option('display.max_columns', 20)
 
@@ -99,12 +96,16 @@ class Oanda:
     @staticmethod
     def _orderbook_for_pair(market_id: str):
         market_id = Oanda._validate_currency_pair(market_id)
-        req_url = Oanda.BASE_URL + f'/markets/{market_id}/orderbook'
-        json_resp = json.loads(requests.get(req_url).text)
-        ask_price = [row[0] for row in json_resp["asks"]]
-        ask_qty = [row[1] for row in json_resp["asks"]]
-        bid_price = [row[0] for row in json_resp["bids"]]
-        bid_qty = [row[1] for row in json_resp["bids"]]
+
+        # Local scoped object
+        obj_scoped = Oanda()
+        pair_details = obj_scoped.client.request(
+            pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{market_id}"}))['prices'][0]
+
+        ask_price = [float(x['price'])for x in pair_details["asks"]]
+        ask_qty = [float(x['liquidity'])for x in pair_details["asks"]]
+        bid_price = [float(x['price'])for x in pair_details["bids"]]
+        bid_qty = [float(x['liquidity'])for x in pair_details["bids"]]
         return bid_price, bid_qty, ask_price, ask_qty
 
     @staticmethod
@@ -118,15 +119,14 @@ class Oanda:
 
 
 if __name__ == "__main__":
-    from pprint import pprint
     # aud_sgd_details = Oanda.get_details_for_pair("AUD_SGD")
     # aud_sgd_details_dict = Oanda.get_details_for_pair("AUD_SGD", as_dict=True)
     # print(aud_sgd_details_dict)
 
-    aud_sgd_price = Oanda.get_price_for_pair("AUD_SGD")
-    aud_sgd_price_dict = Oanda.get_price_for_pair("AUD_SGD", as_dict=True)
-    print(aud_sgd_price)
+    # aud_sgd_price = Oanda.get_price_for_pair("AUD_SGD")
+    # aud_sgd_price_dict = Oanda.get_price_for_pair("AUD_SGD", as_dict=True)
+    # print(aud_sgd_price)
 
-    # btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
-    # btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)
-    # print(btc_aud_ob)
+    btc_aud_ob = Oanda.get_orderbook_for_pair("AUD_SGD")
+    btc_aud_ob_dict = Oanda.get_orderbook_for_pair("AUD_SGD", as_dict=True)
+    print(btc_aud_ob_dict)

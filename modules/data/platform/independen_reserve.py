@@ -122,10 +122,10 @@ class IndependentReserve:
         base, quote = market_id.split("-")[0], market_id.split("-")[1]
         req_url = IndependentReserve.BASE_URL + f'/GetOrderBook?primaryCurrencyCode={base}&secondaryCurrencyCode={quote}'
         json_resp = json.loads(requests.get(req_url).text)
-        ask_price = [x["Price"] for x in json_resp["BuyOrders"]][:50]
-        ask_qty = [x["Volume"] for x in json_resp["BuyOrders"]][:50]
-        bid_price = [x["Price"] for x in json_resp["SellOrders"]][:50]
-        bid_qty = [x["Volume"] for x in json_resp["SellOrders"]][:50]
+        ask_price = [float(x["Price"]) for x in json_resp["BuyOrders"]][:50]
+        ask_qty = [float(x["Volume"] )for x in json_resp["BuyOrders"]][:50]
+        bid_price = [float(x["Price"]) for x in json_resp["SellOrders"]][:50]
+        bid_qty = [float(x["Volume"]) for x in json_resp["SellOrders"]][:50]
         return ask_price, ask_qty, bid_price, bid_qty
 
     @staticmethod
@@ -146,10 +146,10 @@ if __name__ == "__main__":
     # btc_sgd_dict = IndependentReserve.get_details_for_pair("XBT_SGD", as_dict=True)
     # print(btc_sgd_df)
 
-    btc_sgd_price = IndependentReserve.get_price_for_pair("XBT_SGD")
-    btc_sgd_price_dict = IndependentReserve.get_price_for_pair("XBT_SGD", as_dict=True)
-    print(btc_sgd_price)
+    # btc_sgd_price = IndependentReserve.get_price_for_pair("XBT_SGD")
+    # btc_sgd_price_dict = IndependentReserve.get_price_for_pair("XBT_SGD", as_dict=True)
+    # print(btc_sgd_price)
 
-    # btc_aud_ob = IndependentReserve.get_orderbook_for_pair("BTC_AUD")
-    # btc_aud_ob_dict = IndependentReserve.get_orderbook_for_pair("BTC_AUD", as_dict=True)
-    # print(btc_aud_ob)
+    btc_aud_ob = IndependentReserve.get_orderbook_for_pair("BTC_AUD")
+    btc_aud_ob_dict = IndependentReserve.get_orderbook_for_pair("BTC_AUD", as_dict=True)
+    print(btc_aud_ob.info())

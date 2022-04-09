@@ -96,10 +96,10 @@ class BTCMarkets:
         market_id = BTCMarkets._validate_currency_pair(market_id)
         req_url = BTCMarkets.BASE_URL + f'/markets/{market_id}/orderbook'
         json_resp = json.loads(requests.get(req_url).text)
-        ask_price = [row[0] for row in json_resp["asks"]]
-        ask_qty = [row[1] for row in json_resp["asks"]]
-        bid_price = [row[0] for row in json_resp["bids"]]
-        bid_qty = [row[1] for row in json_resp["bids"]]
+        ask_price = [float(row[0]) for row in json_resp["asks"]]
+        ask_qty = [float(row[1]) for row in json_resp["asks"]]
+        bid_price = [float(row[0]) for row in json_resp["bids"]]
+        bid_qty = [float(row[1]) for row in json_resp["bids"]]
         return bid_price, bid_qty, ask_price, ask_qty
 
     @staticmethod
@@ -120,10 +120,10 @@ if __name__ == "__main__":
     # btc_aud_dict = BTCMarkets.get_details_for_pair("BTC_AUD", as_dict=True)
     # print(btc_aud_df)
 
-    btc_aud_price = BTCMarkets.get_price_for_pair("BTC_AUD")
-    btc_aud_price_dict = BTCMarkets.get_price_for_pair("BTC_AUD", as_dict=True)
-    print(btc_aud_price_dict)
+    # btc_aud_price = BTCMarkets.get_price_for_pair("BTC_AUD")
+    # btc_aud_price_dict = BTCMarkets.get_price_for_pair("BTC_AUD", as_dict=True)
+    # print(btc_aud_price_dict)
 
-    # btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
-    # btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)
-    # print(btc_aud_ob)
+    btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
+    btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)
+    print(btc_aud_ob)
