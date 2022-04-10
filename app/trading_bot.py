@@ -1,3 +1,6 @@
+import datetime
+import time
+
 from modules.data.platform.btcmarkets import BTCMarkets
 from modules.data.platform.independent_reserve import IndependentReserve
 from modules.data.platform.oanda import Oanda
@@ -10,6 +13,30 @@ from modules.strategy.surface_arb import SurfaceArb
 1 Base = 'x' Quote
 """
 
+
+def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=30):
+    ## Trio details
+    obj1 = IdentifyPairs(paired_order=currency_dict)
+    trio_details = obj1.get_tradeable_trio
+
+    i = 0
+    while i < max_duration:
+        print(f"{i + 1}: {datetime.datetime.now()}")
+        ## Get data for TRIO based on details
+        obj2 = Data(trio_details)
+        trio_prices = obj2.get_price_for_trio()
+
+        ## Check for Surface Arbitrage
+        obj3 = SurfaceArb(trio_details, trio_prices, init_amount, init_cur)
+        trades_log = obj3.get_trade_logs
+
+        ## Print statements
+        print(trades_log.iloc[:, :5])
+        print()
+        i += 1
+        time.sleep(run_interval)
+
+
 if __name__ == "__main__":
     cur_dict1 = {
         "AUD_SGD": Oanda,
@@ -17,27 +44,4 @@ if __name__ == "__main__":
         "BTC_SGD": IndependentReserve
     }
 
-    ## Trio details
-    obj1 = IdentifyPairs(paired_order=cur_dict1)
-    trio_details = obj1.get_tradeable_trio
-
-    ## Get data for TRIO based on details
-    obj2 = Data(trio_details)
-    trio_prices = obj2.get_price_for_trio()
-
-    ## Check for Surface Arbitrage
-    obj3 = SurfaceArb(trio_details, trio_prices, 100000, "AUD")
-    trades_AUD = obj3.get_trade_logs
-
-    obj4 = SurfaceArb(trio_details, trio_prices, 100000, "SGD")
-    trades_SGD = obj4.get_trade_logs
-
-    obj5 = SurfaceArb(trio_details, trio_prices, 1, "BTC")
-    trades_BTC = obj5.get_trade_logs
-
-    ## Print statements
-    print(trades_AUD)
-    print()
-    print(trades_SGD)
-    print()
-    print(trades_BTC)
+    run_surface_arb(cur_dict1)
