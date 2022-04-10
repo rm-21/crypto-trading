@@ -2,8 +2,8 @@ import sys
 import time
 from pprint import pprint
 
-sys.path.append("..")
-from modules.data.poloniex.poloniex_api import Poloniex as pl
+sys.path.append("../..")
+from modules.data.deprecated.poloniex.poloniex_api import Poloniex as pl
 from modules.strategy.deprecated.identify_pairs import IdentifyPairs
 from modules.strategy.surface_arb import SurfaceArb
 
