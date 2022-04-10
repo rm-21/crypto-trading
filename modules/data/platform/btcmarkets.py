@@ -77,7 +77,8 @@ class BTCMarkets:
         BTCMarkets._check_currency_exists(market_id)
         coins_tradeable = BTCMarkets._coins_tradeable()
         pair_details = coins_tradeable[coins_tradeable["marketId"] == market_id].copy(deep=True)
-        return pair_details[["marketId", "baseAssetName", "quoteAssetName"]].reset_index(drop=True)
+        pair_details["exchange_obj"] = BTCMarkets
+        return pair_details[["marketId", "baseAssetName", "quoteAssetName", "exchange_obj"]].reset_index(drop=True)
 
     @staticmethod
     def _price_for_pair_url(market_id: str):

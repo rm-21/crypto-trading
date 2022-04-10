@@ -64,7 +64,8 @@ class Oanda:
         pair_details = pd.DataFrame({
             "marketId": market_id,
             "baseAssetName": market_id.split("_")[0],
-            "quoteAssetName": market_id.split("_")[1]
+            "quoteAssetName": market_id.split("_")[1],
+            "exchange_obj": Oanda
         }, index=[0])
         return pair_details
 
