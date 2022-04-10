@@ -11,7 +11,7 @@ class Conversion:
         if direction == "forward":
             _base_cur = base_currency
             _quote_cur = quote_currency
-            _swap_rate = 1 / ask
+            _swap_rate = bid
 
             return {
                 "new_amount": _swap_rate * init_amount,
@@ -23,7 +23,7 @@ class Conversion:
         elif direction == "reverse":
             _base_cur = quote_currency
             _quote_cur = base_currency
-            _swap_rate = bid
+            _swap_rate = 1 / ask
 
             return {
                 "new_amount": _swap_rate * init_amount,
