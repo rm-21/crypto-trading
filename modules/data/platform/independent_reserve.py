@@ -140,6 +140,10 @@ class IndependentReserve:
         if "_" in market_id:
             if len(market_id.split("_")) != 2:
                 raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
+            if market_id.split("_")[0] == "BTC":
+                market_id = "XBT" + "_" + market_id.split("_")[1]
+            elif market_id.split("_")[1] == "BTC":
+                market_id = market_id.split("_")[0] + "_" + "XBT"
             return market_id
         else:
             raise ValueError("Currency pair should be of the format <Currency>_<Currency>")

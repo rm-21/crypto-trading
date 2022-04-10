@@ -1,10 +1,6 @@
 from itertools import permutations
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-
-from modules.data.platform.btcmarkets import BTCMarkets
-from modules.data.platform.independent_reserve import IndependentReserve
-from modules.data.platform.oanda import Oanda
 import pandas as pd
 
 
@@ -24,7 +20,8 @@ class IdentifyPairs:
         self.find_all = find_all
 
         # If paired order is given, check if it is valid
-        self._trio_details = self._validate_paired_order()
+        self._trio_details = None
+        self._get_trio_details()
 
     @property
     def get_tradeable_trio(self):
@@ -34,34 +31,39 @@ class IdentifyPairs:
     def get_all_tradeable_trios(self):
         return self._tradeable_all_pairs
 
+    def _get_trio_details(self):
+        if self.paired_order:
+            self._trio_details = self._validate_paired_order()
+        else:
+            self._trio_details = self._get_paired_order()
+
     def _validate_paired_order(self):
         with ThreadPoolExecutor(max_workers=10) as pool:
             resp = list(pool.map(lambda args: args[1].get_details_for_pair(args[0]), list(self.paired_order.items())))
 
-        return pd.concat(resp, ignore_index=True)
+        details = pd.concat(resp, ignore_index=True)
+        return details
 
-    @staticmethod
-    def _validate_paired_currency(item: str):
-        """
-        Validate a currency pair by checking if "_" is present and two currencies on each side are present.
-        """
-        if ("_" not in item) or (len(item.split("_")) != 2):
-            raise ValueError(
-                f"{item}: Invalid Pair. Pair should be of the form <Currency>_<Currency>."
-            )
+    def _get_paired_order(self):
+        pass
 
 
 if __name__ == "__main__":
+    from modules.data.platform.btcmarkets import BTCMarkets
+    from modules.data.platform.independent_reserve import IndependentReserve
+    from modules.data.platform.oanda import Oanda
+
     cur_dict1 = {
         "AUD_SGD": Oanda,
         "BTC_AUD": BTCMarkets,
-        "XBT_SGD": IndependentReserve
+        "BTC_SGD": IndependentReserve
     }
 
-    # Initialise the object
-    obj = IdentifyPairs(paired_order=cur_dict1)
-
-    # Get trio details
-    trio_details = obj.get_tradeable_trio
-
+    # When paired object is given
+    obj1 = IdentifyPairs(paired_order=cur_dict1)
+    trio_details = obj1.get_tradeable_trio
     print(trio_details)
+
+    # When paired object is not given
+    list_cur = ["AUD", "SGD", "BTC"]
+    list_exch = [Oanda, IndependentReserve, BTCMarkets]
