@@ -1,6 +1,7 @@
 import networkx as nx
 import pandas as pd
 from modules.strategy.conversion import Conversion
+from modules.strategy.conversion_direction import Graph
 
 
 class SurfaceArb:
@@ -15,35 +16,10 @@ class SurfaceArb:
         self.init_amount = init_amount
         self.init_currency = init_currency
 
-    def _create_edges(self):
-        edges = []
-        for pair in self.trio:
-            currencies = pair.split("_")
-            tuple_1 = (currencies[0], currencies[1])
-            tuple_2 = (currencies[1], currencies[0])
-            edges = edges + [tuple_1, tuple_2]
-
-        return edges
-
-    def _create_paths(self):
-        G = nx.Graph()
-        G.add_edges_from(self._create_edges())
-
-        node_to_cycles = {}
-        for source in G.nodes():
-            paths = []
-            for target in G.neighbors(source):
-                paths += [
-                    l + [source]
-                    for l in list(nx.all_simple_paths(G, source=source, target=target))
-                    if len(l) > 2
-                ]
-            node_to_cycles[source] = paths
-        return node_to_cycles[self.init_currency]
-
     def _get_quote_to_use(self):
         quotes_to_use = []
-        paths = self._create_paths()
+        paths = Graph(self.trio_details, self.init_currency).get_paths()
+
         for path in paths:
             path_details = []
             for i in range(1, len(path)):
@@ -154,7 +130,7 @@ if __name__ == "__main__":
     obj3 = SurfaceArb(trio_details, trio_prices, 10000, "AUD")
 
     ## Print statements
-    # print(trio_details)
+    print(trio_prices)
     print(obj3._create_paths())
 
     # ## Boiler
