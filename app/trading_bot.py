@@ -19,7 +19,10 @@ if __name__ == "__main__":
     ## Get data for TRIO based on details
     obj2 = Data(trio_details)
     trio_prices = obj2.get_price_for_trio()
-    print(trio_prices)
 
     ## Check for Surface Arbitrage
 
+
+
+    ## Print statements
+    print(trio_details)

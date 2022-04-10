@@ -42,6 +42,11 @@ class IdentifyPairs:
             resp = list(pool.map(lambda args: args[1].get_details_for_pair(args[0]), list(self.paired_order.items())))
 
         details = pd.concat(resp, ignore_index=True)
+
+        check_series = pd.concat([details["baseAssetName"].value_counts(),
+                                  details["quoteAssetName"].value_counts()], axis=1).sum(axis=1)
+        if len(check_series[check_series != 2]) > 0:
+            raise ValueError("Currency pairs are not correct. Please check that there is 2 of each currency.")
         return details
 
     def _get_paired_order(self):
@@ -56,12 +61,16 @@ if __name__ == "__main__":
     from modules.data.platform.independent_reserve import IndependentReserve
     from modules.data.platform.oanda import Oanda
 
+    # cur_dict1 = {
+    #     "AUD_SGD": Oanda,
+    #     "BTC_AUD": BTCMarkets,
+    #     "BTC_SGD": IndependentReserve
+    # }
     cur_dict1 = {
         "AUD_SGD": Oanda,
         "BTC_AUD": BTCMarkets,
         "BTC_SGD": IndependentReserve
     }
-
     ## When paired object is given
     obj1 = IdentifyPairs(paired_order=cur_dict1)
     trio_details = obj1.get_tradeable_trio

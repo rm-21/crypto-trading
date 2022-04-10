@@ -1,25 +1,17 @@
 import networkx as nx
-import sys
 import pandas as pd
-sys.path.append("..")
 from modules.strategy.conversion import Conversion
 
 
 class SurfaceArb:
-    TRADES_LOG = pd.DataFrame(
-        columns=[
-            "new_amount",
-            "denomination",
-            "swap_rate",
-            "direction",
-            "profit",
-            "percent",
-        ]
-    )
+    TRADES_LOG = pd.DataFrame(columns=["new_amount", "denomination", "swap_rate", "direction", "profit", "percent"])
 
-    def __init__(self, trio: list, trio_prices: dict, init_amount: float, init_currency: str):
-        self.trio = trio
+    def __init__(self, trio_details: pd.DataFrame, trio_prices: pd.DataFrame, init_amount: float, init_currency: str):
+        self.trio_details = trio_details
         self.trio_prices = trio_prices
+
+        self.trio = self.trio_details["marketId"].tolist()
+
         self.init_amount = init_amount
         self.init_currency = init_currency
 
@@ -138,39 +130,66 @@ class SurfaceArb:
 
 
 if __name__ == "__main__":
-    ## Boiler
-    import sys
-    from pprint import pprint
+    from modules.data.platform.btcmarkets import BTCMarkets
+    from modules.data.platform.independent_reserve import IndependentReserve
+    from modules.data.platform.oanda import Oanda
+    from modules.data.data_api import Data
+    from modules.strategy.identify_pairs import IdentifyPairs
 
-    sys.path.append("..")
-    from modules.data.poloniex.poloniex_api import Poloniex as pl
-    from modules.strategy.deprecated.identify_pairs import IdentifyPairs
-
-    coin_price_url = "https://poloniex.com/public?command=returnTicker"
-    data_obj = pl(coin_price_url)
-
-    coin_list = data_obj.get_coins_tradeable
-
-    ## Pairs
-    trio = IdentifyPairs(
-        coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"]
-    ).get_tradeable_trio
+    cur_dict1 = {
+        "AUD_SGD": Oanda,
+        "BTC_AUD": BTCMarkets,
+        "BTC_SGD": IndependentReserve
+    }
 
     ## Trio details
-    trio_details = data_obj.get_details_for_trio(trio)
-    trio_prices = data_obj.get_price_for_trio(trio)
+    obj1 = IdentifyPairs(paired_order=cur_dict1)
+    trio_details = obj1.get_tradeable_trio
 
-    # print(trio_prices)
+    ## Get data for TRIO based on details
+    obj2 = Data(trio_details)
+    trio_prices = obj2.get_price_for_trio()
 
-    ## Main
-    obj1 = SurfaceArb(trio, trio_prices, 100, "USDT")
-    pprint(obj1.get_trade_logs)
-    print()
+    ## Check for Surface Arbitrage
+    obj3 = SurfaceArb(trio_details, trio_prices, 10000, "AUD")
 
-    obj2 = SurfaceArb(trio, trio_prices, 1, "BTC")
-    pprint(obj2.get_trade_logs)
-    print()
+    ## Print statements
+    # print(trio_details)
+    print(obj3._create_paths())
 
-    obj3 = SurfaceArb(trio, trio_prices, 50, "ETH")
-    pprint(obj3.get_trade_logs)
-    print()
+    # ## Boiler
+    # import sys
+    # from pprint import pprint
+    #
+    # sys.path.append("..")
+    # from modules.data.poloniex.poloniex_api import Poloniex as pl
+    # from modules.strategy.deprecated.identify_pairs import IdentifyPairs
+    #
+    # coin_price_url = "https://poloniex.com/public?command=returnTicker"
+    # data_obj = pl(coin_price_url)
+    #
+    # coin_list = data_obj.get_coins_tradeable
+    #
+    # ## Pairs
+    # trio = IdentifyPairs(
+    #     coin_list, paired_order=["USDT_BTC", "USDT_ETH", "BTC_ETH"]
+    # ).get_tradeable_trio
+    #
+    # ## Trio details
+    # trio_details = data_obj.get_details_for_trio(trio)
+    # trio_prices = data_obj.get_price_for_trio(trio)
+    #
+    # # print(trio_prices)
+    #
+    # ## Main
+    # obj1 = SurfaceArb(trio, trio_prices, 100, "USDT")
+    # pprint(obj1.get_trade_logs)
+    # print()
+    #
+    # obj2 = SurfaceArb(trio, trio_prices, 1, "BTC")
+    # pprint(obj2.get_trade_logs)
+    # print()
+    #
+    # obj3 = SurfaceArb(trio, trio_prices, 50, "ETH")
+    # pprint(obj3.get_trade_logs)
+    # print()
