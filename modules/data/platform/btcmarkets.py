@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import json
 pd.set_option('display.max_columns', 20)
+from datetime import datetime
 
 
 class BTCMarkets:
@@ -40,8 +41,10 @@ class BTCMarkets:
         """
         Pull order book data for pair
         """
-        bid_price, bid_qty, ask_price, ask_qty = BTCMarkets._orderbook_for_pair(market_id=market_id)
+        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = BTCMarkets._orderbook_for_pair(market_id=market_id)
         orderbook = pd.DataFrame({
+            "market_id": market_id,
+            "timestamp": timestamp,
             "bid_price": bid_price,
             "bid_qty": bid_qty,
             "ask_price": ask_price,
@@ -93,7 +96,7 @@ class BTCMarkets:
         req = requests.get(req_url)
         price = pd.json_normalize(json.loads(req.text))
         price["marketId"] = market_id
-        price["timestamp"] = pd.to_datetime(price["timestamp"])
+        price["timestamp"] = pd.to_datetime(datetime.utcnow())
         price = price.astype({
             "bestBid": float,
             "bestAsk": float,
@@ -118,11 +121,12 @@ class BTCMarkets:
     def _orderbook_for_pair(market_id: str):
         req_url = BTCMarkets._orderbook_for_pair_url(market_id)
         json_resp = json.loads(requests.get(req_url).text)
+        timestamp = datetime.utcnow()
         ask_price = [float(row[0]) for row in json_resp["asks"]]
         ask_qty = [float(row[1]) for row in json_resp["asks"]]
         bid_price = [float(row[0]) for row in json_resp["bids"]]
         bid_qty = [float(row[1]) for row in json_resp["bids"]]
-        return bid_price, bid_qty, ask_price, ask_qty
+        return market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty
 
     @staticmethod
     def _validate_currency_pair(market_id: str):

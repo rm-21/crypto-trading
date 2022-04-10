@@ -1,7 +1,7 @@
 import oandapyV20.endpoints.pricing as pricing
 import pandas as pd
 from oandapyV20 import API
-
+from datetime import datetime
 pd.set_option('display.max_columns', 20)
 
 
@@ -40,8 +40,10 @@ class Oanda:
         """
         Pull order book data for pair
         """
-        bid_price, bid_qty, ask_price, ask_qty = Oanda._orderbook_for_pair(market_id=market_id)
+        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = Oanda._orderbook_for_pair(market_id=market_id)
         orderbook = pd.DataFrame({
+            "market_id": market_id,
+            "timestamp": timestamp,
             "bid_price": bid_price,
             "bid_qty": bid_qty,
             "ask_price": ask_price,
@@ -83,7 +85,7 @@ class Oanda:
             "marketId": market_id,
             "bestBid": pair_details["bids"][0]['price'],
             "bestAsk": pair_details["asks"][0]['price'],
-            "timestamp": pair_details["time"]
+            "timestamp": pd.to_datetime(datetime.utcnow())
         }, index=[0])
 
         price["timestamp"] = pd.to_datetime(price["timestamp"])
@@ -101,12 +103,12 @@ class Oanda:
         obj_scoped = Oanda()
         pair_details = obj_scoped.client.request(
             pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{market_id}"}))['prices'][0]
-
+        timestamp = datetime.utcnow()
         ask_price = [float(x['price'])for x in pair_details["asks"]]
         ask_qty = [float(x['liquidity'])for x in pair_details["asks"]]
         bid_price = [float(x['price'])for x in pair_details["bids"]]
         bid_qty = [float(x['liquidity'])for x in pair_details["bids"]]
-        return bid_price, bid_qty, ask_price, ask_qty
+        return market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty
 
     @staticmethod
     def _validate_currency_pair(market_id: str):

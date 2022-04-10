@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 import json
-
+from datetime import datetime
 pd.set_option('display.max_columns', 20)
 
 
@@ -41,8 +41,10 @@ class IndependentReserve:
         """
         Pull order book data for pair
         """
-        bid_price, bid_qty, ask_price, ask_qty = IndependentReserve._orderbook_for_pair(market_id=market_id)
+        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = IndependentReserve._orderbook_for_pair(market_id=market_id)
         orderbook = pd.DataFrame({
+            "market_id": market_id,
+            "timestamp": timestamp,
             "bid_price": bid_price,
             "bid_qty": bid_qty,
             "ask_price": ask_price,
@@ -112,8 +114,8 @@ class IndependentReserve:
             "price24h": float(price["DayAvgPrice"]),
             "low24h": float(price["DayLowestPrice"]),
             "high24h": float(price["DayHighestPrice"]),
-            "timestamp": pd.to_datetime(price["CreatedTimestampUtc"])
-        })
+            "timestamp": pd.to_datetime(datetime.utcnow())
+        }, index=[0])
 
         return price[["marketId", "bestBid", "bestAsk", "timestamp"]]
 
@@ -129,11 +131,12 @@ class IndependentReserve:
     def _orderbook_for_pair(market_id: str):
         req_url, base, quote = IndependentReserve._orderbook_for_pair_url(market_id)
         json_resp = json.loads(requests.get(req_url).text)
+        timestamp = datetime.utcnow()
         ask_price = [float(x["Price"]) for x in json_resp["BuyOrders"]][:50]
         ask_qty = [float(x["Volume"]) for x in json_resp["BuyOrders"]][:50]
         bid_price = [float(x["Price"]) for x in json_resp["SellOrders"]][:50]
         bid_qty = [float(x["Volume"]) for x in json_resp["SellOrders"]][:50]
-        return ask_price, ask_qty, bid_price, bid_qty
+        return market_id, timestamp, ask_price, ask_qty, bid_price, bid_qty
 
     @staticmethod
     def _validate_currency_pair(market_id: str):
