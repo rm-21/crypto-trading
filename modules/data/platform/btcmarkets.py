@@ -36,7 +36,7 @@ class BTCMarkets:
         return price
 
     @staticmethod
-    def get_orderbook_for_pair(market_id: str, as_dict = False):
+    def get_orderbook_for_pair(market_id: str, as_dict=False):
         """
         Pull order book data for pair
         """
@@ -58,22 +58,37 @@ class BTCMarkets:
         return req_url
 
     @staticmethod
-    def _coins_tradeable():
+    def _coins_tradeable(replace=True):
         url = BTCMarkets._coins_tradeable_url()
         coins_tradeable = pd.read_json(url)
-        coins_tradeable["marketId"] = coins_tradeable["marketId"].str.replace("-", "_")
+        if replace:
+            coins_tradeable["marketId"] = coins_tradeable["marketId"].str.replace("-", "_")
         return coins_tradeable
 
     @staticmethod
+    def _check_currency_exists(market_id: str):
+        market_id = BTCMarkets._validate_currency_pair(market_id)
+        coins_tradeable = BTCMarkets._coins_tradeable(replace=False)
+        if market_id not in coins_tradeable["marketId"].tolist():
+            raise ValueError(f"Pair {market_id} does not exist in BTCMarkets")
+
+    @staticmethod
     def _details_for_pair(market_id: str):
+        BTCMarkets._check_currency_exists(market_id)
         coins_tradeable = BTCMarkets._coins_tradeable()
         pair_details = coins_tradeable[coins_tradeable["marketId"] == market_id].copy(deep=True)
         return pair_details[["marketId", "baseAssetName", "quoteAssetName"]].reset_index(drop=True)
 
     @staticmethod
-    def _price_for_pair(market_id: str):
+    def _price_for_pair_url(market_id: str):
+        BTCMarkets._check_currency_exists(market_id)
         market_id = BTCMarkets._validate_currency_pair(market_id)
         req_url = BTCMarkets.BASE_URL + f'/markets/{market_id}/ticker'
+        return req_url
+
+    @staticmethod
+    def _price_for_pair(market_id: str):
+        req_url = BTCMarkets._price_for_pair_url(market_id)
         req = requests.get(req_url)
         price = pd.json_normalize(json.loads(req.text))
         price["marketId"] = market_id
@@ -92,9 +107,15 @@ class BTCMarkets:
         return price[["marketId", "bestBid", "bestAsk", "timestamp"]]
 
     @staticmethod
-    def _orderbook_for_pair(market_id: str):
+    def _orderbook_for_pair_url(market_id: str):
+        BTCMarkets._check_currency_exists(market_id)
         market_id = BTCMarkets._validate_currency_pair(market_id)
         req_url = BTCMarkets.BASE_URL + f'/markets/{market_id}/orderbook'
+        return req_url
+
+    @staticmethod
+    def _orderbook_for_pair(market_id: str):
+        req_url = BTCMarkets._orderbook_for_pair_url(market_id)
         json_resp = json.loads(requests.get(req_url).text)
         ask_price = [float(row[0]) for row in json_resp["asks"]]
         ask_qty = [float(row[1]) for row in json_resp["asks"]]
@@ -122,7 +143,7 @@ if __name__ == "__main__":
 
     # btc_aud_price = BTCMarkets.get_price_for_pair("BTC_AUD")
     # btc_aud_price_dict = BTCMarkets.get_price_for_pair("BTC_AUD", as_dict=True)
-    # print(btc_aud_price_dict)
+    # print(btc_aud_price)
 
     btc_aud_ob = BTCMarkets.get_orderbook_for_pair("BTC_AUD")
     btc_aud_ob_dict = BTCMarkets.get_orderbook_for_pair("BTC_AUD", as_dict=True)

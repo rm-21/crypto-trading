@@ -147,7 +147,7 @@ if __name__ == "__main__":
 
     sys.path.append("..")
     from modules.data.poloniex.poloniex_api import Poloniex as pl
-    from modules.strategy.identify_pairs import IdentifyPairs
+    from modules.strategy.deprecated.identify_pairs import IdentifyPairs
 
     coin_price_url = "https://poloniex.com/public?command=returnTicker"
     data_obj = pl(coin_price_url)

@@ -14,8 +14,6 @@ class Oanda:
 
     def __init__(self):
         self.client = API(access_token=Oanda.ACCESS_TOKEN)
-        # print(self.client.request(pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": "AUD_SGD"})))
-        # print(self.client.request(instruments.InstrumentsOrderBook(instrument="AUD_SGD")))
 
     @staticmethod
     def get_details_for_pair(market_id: str, as_dict: bool = False):
@@ -59,7 +57,8 @@ class Oanda:
         market_id = Oanda._validate_currency_pair(market_id)
         # Local scoped object
         obj_scoped = Oanda()
-        obj_req = obj_scoped.client.request(pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{market_id}"}))
+        obj_req = obj_scoped.client.request(pricing.PricingInfo(Oanda.ACCOUNT_ID,
+                                                                params={"instruments": f"{market_id}"}))
         market_id = obj_req['prices'][0]['instrument']
 
         pair_details = pd.DataFrame({
@@ -115,7 +114,7 @@ class Oanda:
                 raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
             return market_id
         else:
-            raise ValueError("Currency pair should be of the format <Currency>_Currency")
+            raise ValueError("Currency pair should be of the format <Currency>_<Currency>")
 
 
 if __name__ == "__main__":
@@ -129,4 +128,4 @@ if __name__ == "__main__":
 
     btc_aud_ob = Oanda.get_orderbook_for_pair("AUD_SGD")
     btc_aud_ob_dict = Oanda.get_orderbook_for_pair("AUD_SGD", as_dict=True)
-    print(btc_aud_ob_dict)
+    print(btc_aud_ob)

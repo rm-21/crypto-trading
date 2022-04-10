@@ -1,13 +1,10 @@
 import sys
+import time
 from pprint import pprint
-import json
-
-from numpy import append
 
 sys.path.append("..")
 from modules.data.poloniex.poloniex_api import Poloniex as pl
-from modules.strategy.identify_pairs import IdentifyPairs
-from modules.strategy.conversion import Conversion
+from modules.strategy.deprecated.identify_pairs import IdentifyPairs
 from modules.strategy.surface_arb import SurfaceArb
 
 coin_price_url = "https://poloniex.com/public?command=returnTicker"
@@ -23,20 +20,16 @@ if __name__ == "__main__":
     ).get_tradeable_trio
 
     ## Depth
-    print("\nFormatted: FORWARD")
-    print(data_obj.get_depth_for_pair(trio[0])[0]["bids"])
-    print()
-    print(data_obj.get_depth_for_pair(trio[0])[0]["asks"])
-    print()
-    print("Formatted: REVERSE")
-    print(data_obj.get_depth_for_pair(trio[0])[1]["bids"])
-    print()
-    print(data_obj.get_depth_for_pair(trio[0])[1]["asks"])
-    print()
-
-    ## Trio details
-    # trio_details = data_obj.get_details_for_trio(trio)
-    # trio_prices = data_obj.get_price_for_trio(trio)
+    # print("\nFormatted: FORWARD")
+    # print(data_obj.get_depth_for_pair(trio[0])[0]["bids"])
+    # print()
+    # print(data_obj.get_depth_for_pair(trio[0])[0]["asks"])
+    # print()
+    # print("Formatted: REVERSE")
+    # print(data_obj.get_depth_for_pair(trio[0])[1]["bids"])
+    # print()
+    # print(data_obj.get_depth_for_pair(trio[0])[1]["asks"])
+    # print()
 
     # print(trio_prices)
 
@@ -48,9 +41,14 @@ if __name__ == "__main__":
     # multiplication_ = ustd_btc_last * btc_eth_last
     # print(multiplication_, usdt_eth_last, multiplication_ - usdt_eth_last)
 
-    # obj1 = SurfaceArb(trio, trio_prices, 10000, "USDT")
-    # pprint(obj1.get_trade_logs)
-    # print()
+    while True:
+        ## Trio details
+        trio_details = data_obj.get_details_for_trio(trio)
+        trio_prices = data_obj.get_price_for_trio(trio)
+        obj1 = SurfaceArb(trio, trio_prices, 10000, "USDT")
+        pprint(obj1.get_trade_logs)
+        time.sleep(1)
+        print()
 
     # obj2 = SurfaceArb(trio, trio_prices, 10, "BTC")
     # pprint(obj2.get_trade_logs)

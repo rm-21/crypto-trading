@@ -1,37 +1,33 @@
 from itertools import permutations
 from collections import defaultdict
 
-from modules.data.platform.btcmarkets import BTCMarkets
-from modules.data.platform.independent_reserve import IndependentReserve
-from modules.data.platform.oanda import Oanda
-
 
 class IdentifyPairs:
-    def __init__(self, currency_pair: list = None, currency_exchange: list = None,
-                 paired_order: dict = None,
-                 find_all: bool = False):
-
-        # Option 1
-        self.currency_pair = currency_pair
-        self.currency_exchange = currency_exchange
-
-        # Option 2
+    def __init__(
+        self,
+        tradeable_pairs: list,
+        individual_currencies: list = None,
+        paired_order: list = None,
+        find_all: bool = False,
+    ):
+        self.tradeable_pairs = tradeable_pairs
+        self.individual_currencies = individual_currencies
         self.paired_order = paired_order
-
-        # Choice
         self.find_all = find_all
 
-        # If paired order is given, check if it is valid
-        self._validate_paired_order()
+        ## Final Pairs
+        # 1. If paired_order is there, validate it and see if it is present in the tradeable_pairs list
+        # 2. If 1 is false, and individual currencies are present, create trio and check as in 1
+        self._tradeable_trio = (
+            self.paired_order
+            if self._check_paired_order()
+            else self._create_tradeable_trio_from_individual()
+        )
 
-    def _validate_paired_order(self):
-        if self.paired_order:
-            keys = self.paired_order.keys()
-            values = self.paired_order.values()
-
-            for k, v in self.paired_order.items():
-                print(v.get_details_for_pair(k))
-
+        ## Complete List of tradeable pairs
+        # If Final Pairs is None OR find_all == True
+        # Create all trios based on tradeable_pairs list.
+        self._tradeable_all_pairs = self._create_all_pairs()
 
     @property
     def get_tradeable_trio(self):
@@ -126,11 +122,18 @@ class IdentifyPairs:
 
 
 if __name__ == "__main__":
-    cur_dict1 = {
-        "AUD_SGD": Oanda,
-        "BTC_AUD": BTCMarkets,
-        "XBT_SGD": IndependentReserve
-    }
+    ## Boiler
+    import sys
 
-    obj = IdentifyPairs(paired_order=cur_dict1)
-    obj._validate_paired_order()
+    sys.path.append("../..")
+    from modules.data.poloniex.poloniex_api import Poloniex as pl
+    from modules.strategy.deprecated.identify_pairs import IdentifyPairs
+
+    coin_price_url = "https://poloniex.com/public?command=returnTicker"
+    data_obj = pl(coin_price_url)
+
+    coin_list = data_obj.get_coins_tradeable
+
+    ## Main
+    obj = IdentifyPairs(coin_list)
+    print(obj._create_all_pairs())

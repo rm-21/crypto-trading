@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 class Poloniex:
     """
     Parameters:
