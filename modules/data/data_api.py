@@ -1,5 +1,5 @@
 import pandas as pd
-from data_abstract import DataAbstract
+from modules.data.data_abstract import DataAbstract
 from concurrent.futures import ThreadPoolExecutor
 
 

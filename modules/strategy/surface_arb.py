@@ -1,7 +1,6 @@
 import networkx as nx
 import sys
 import pandas as pd
-
 sys.path.append("..")
 from modules.strategy.conversion import Conversion
 
@@ -18,9 +17,7 @@ class SurfaceArb:
         ]
     )
 
-    def __init__(
-        self, trio: list, trio_prices: dict, init_amount: float, init_currency: str
-    ):
+    def __init__(self, trio: list, trio_prices: dict, init_amount: float, init_currency: str):
         self.trio = trio
         self.trio_prices = trio_prices
         self.init_amount = init_amount
