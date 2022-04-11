@@ -2,45 +2,43 @@ import oandapyV20.endpoints.pricing as pricing
 import pandas as pd
 from oandapyV20 import API
 from datetime import datetime
+from modules.data.oanda_login import oanda_login
+
 pd.set_option('display.max_columns', 20)
 
 
 class Oanda:
     BASE_URL = "https://api-fxpractice.oanda.com"
-    ACCESS_TOKEN = "a172c4339822eeecda7f3b6e7ffd9cf4-481ffa1101fd0ffea2e9364697c3283f"
-    ACCOUNT_ID = "101-011-22118203-001"
+    ACCESS_TOKEN = oanda_login["ACCESS_TOKEN"]
+    ACCOUNT_ID = oanda_login["ACCOUNT_ID"]
 
-    # print(client.request(pricing.PricingInfo(accountID, params={"instruments": "AUD_SGD"})))
-
-    def __init__(self):
+    def __init__(self, market_id: str):
         self.client = API(access_token=Oanda.ACCESS_TOKEN)
+        self.market_id = Oanda._validate_currency_pair(market_id)
 
-    @staticmethod
-    def get_details_for_pair(market_id: str, as_dict: bool = False):
+    def get_details_for_pair(self, as_dict: bool = False):
         """
         Get the base and quote currencies
         """
-        pair_details = Oanda._details_for_pair(market_id=market_id)
+        pair_details = self._details_for_pair()
         if as_dict:
             return pair_details.to_dict(orient='list')
         return pair_details
 
-    @staticmethod
-    def get_price_for_pair(market_id: str, as_dict: bool = False):
+    def get_price_for_pair(self, as_dict: bool = False):
         """
         Pull prices for pair from the respective API
         """
-        price = Oanda._price_for_pair(market_id)
+        price = self._price_for_pair()
         if as_dict:
             return price.to_dict('list')
         return price
 
-    @staticmethod
-    def get_orderbook_for_pair(market_id: str, as_dict=False):
+    def get_orderbook_for_pair(self, as_dict=False):
         """
         Pull order book data for pair
         """
-        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = Oanda._orderbook_for_pair(market_id=market_id)
+        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = self._orderbook_for_pair()
         orderbook = pd.DataFrame({
             "market_id": market_id,
             "timestamp": timestamp,
@@ -54,13 +52,9 @@ class Oanda:
             return orderbook.to_dict('list')
         return orderbook
 
-    @staticmethod
-    def _details_for_pair(market_id: str):
-        market_id = Oanda._validate_currency_pair(market_id)
-        # Local scoped object
-        obj_scoped = Oanda()
-        obj_req = obj_scoped.client.request(pricing.PricingInfo(Oanda.ACCOUNT_ID,
-                                                                params={"instruments": f"{market_id}"}))
+    def _details_for_pair(self):
+        obj_req = self.client.request(pricing.PricingInfo(Oanda.ACCOUNT_ID,
+                                                          params={"instruments": f"{self.market_id}"}))
         market_id = obj_req['prices'][0]['instrument']
 
         pair_details = pd.DataFrame({
@@ -71,18 +65,13 @@ class Oanda:
         }, index=[0])
         return pair_details
 
-    @staticmethod
-    def _price_for_pair(market_id: str):
-        market_id = Oanda._validate_currency_pair(market_id)
+    def _price_for_pair(self):
+        pair_details = self.client.request(
+            pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{self.market_id}"}))['prices'][0]
 
-        # Local scoped object
-        obj_scoped = Oanda()
-        pair_details = obj_scoped.client.request(
-            pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{market_id}"}))['prices'][0]
-
-        base, quote = market_id.split("_")[0], market_id.split("_")[1]
+        base, quote = self.market_id.split("_")[0], self.market_id.split("_")[1]
         price = pd.DataFrame({
-            "marketId": market_id,
+            "marketId": self.market_id,
             "bestBid": pair_details["bids"][0]['price'],
             "bestAsk": pair_details["asks"][0]['price'],
             "timestamp": pd.to_datetime(datetime.utcnow())
@@ -95,20 +84,15 @@ class Oanda:
         })
         return price
 
-    @staticmethod
-    def _orderbook_for_pair(market_id: str):
-        market_id = Oanda._validate_currency_pair(market_id)
-
-        # Local scoped object
-        obj_scoped = Oanda()
-        pair_details = obj_scoped.client.request(
-            pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{market_id}"}))['prices'][0]
+    def _orderbook_for_pair(self):
+        pair_details = self.client.request(
+            pricing.PricingInfo(Oanda.ACCOUNT_ID, params={"instruments": f"{self.market_id}"}))['prices'][0]
         timestamp = datetime.utcnow()
-        ask_price = [float(x['price'])for x in pair_details["asks"]]
-        ask_qty = [float(x['liquidity'])for x in pair_details["asks"]]
-        bid_price = [float(x['price'])for x in pair_details["bids"]]
-        bid_qty = [float(x['liquidity'])for x in pair_details["bids"]]
-        return market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty
+        ask_price = [float(x['price']) for x in pair_details["asks"]]
+        ask_qty = [float(x['liquidity']) for x in pair_details["asks"]]
+        bid_price = [float(x['price']) for x in pair_details["bids"]]
+        bid_qty = [float(x['liquidity']) for x in pair_details["bids"]]
+        return self.market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty
 
     @staticmethod
     def _validate_currency_pair(market_id: str):
@@ -121,14 +105,19 @@ class Oanda:
 
 
 if __name__ == "__main__":
-    # aud_sgd_details = Oanda.get_details_for_pair("AUD_SGD")
-    # aud_sgd_details_dict = Oanda.get_details_for_pair("AUD_SGD", as_dict=True)
-    # print(aud_sgd_details_dict)
+    obj = Oanda("AUD_SGD")
 
-    # aud_sgd_price = Oanda.get_price_for_pair("AUD_SGD")
-    # aud_sgd_price_dict = Oanda.get_price_for_pair("AUD_SGD", as_dict=True)
-    # print(aud_sgd_price)
+    aud_sgd_details = obj.get_details_for_pair()
+    aud_sgd_details_dict = obj.get_details_for_pair(as_dict=True)
+    print(aud_sgd_details)
+    print(aud_sgd_details_dict)
 
-    btc_aud_ob = Oanda.get_orderbook_for_pair("AUD_SGD")
-    btc_aud_ob_dict = Oanda.get_orderbook_for_pair("AUD_SGD", as_dict=True)
+    aud_sgd_price = obj.get_price_for_pair()
+    aud_sgd_price_dict = obj.get_price_for_pair(as_dict=True)
+    print(aud_sgd_price)
+    print(aud_sgd_price_dict)
+
+    btc_aud_ob = obj.get_orderbook_for_pair()
+    btc_aud_ob_dict = obj.get_orderbook_for_pair(as_dict=True)
     print(btc_aud_ob)
+    print(btc_aud_ob_dict)

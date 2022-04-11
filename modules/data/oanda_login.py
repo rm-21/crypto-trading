@@ -1,0 +1,4 @@
+oanda_login = {
+	"ACCESS_TOKEN": "a172c4339822eeecda7f3b6e7ffd9cf4-481ffa1101fd0ffea2e9364697c3283f",
+	"ACCOUNT_ID": "101-011-22118203-001"
+}

@@ -21,10 +21,9 @@ class IdentifyPairs:
 
     def _validate_paired_order(self):
         with ThreadPoolExecutor(max_workers=10) as pool:
-            resp = list(pool.map(lambda args: args[1].get_details_for_pair(args[0]), list(self.paired_order.items())))
+            resp = list(pool.map(lambda args: args[1](args[0]).get_details_for_pair(), list(self.paired_order.items())))
 
         details = pd.concat(resp, ignore_index=True)
-
         check_series = pd.concat([details["baseAssetName"].value_counts(),
                                   details["quoteAssetName"].value_counts()], axis=1).sum(axis=1)
         if len(check_series[check_series != 2]) > 0:

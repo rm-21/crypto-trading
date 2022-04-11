@@ -20,7 +20,7 @@ class Data(DataAbstract):
         """
         paired_order = self._get_paired_order_dict()
         with ThreadPoolExecutor(max_workers=10) as pool:
-            resp = list(pool.map(lambda args: args[1].get_price_for_pair(args[0]), list(paired_order.items())))
+            resp = list(pool.map(lambda args: args[1](args[0]).get_price_for_pair(), list(paired_order.items())))
         prices = pd.concat(resp, ignore_index=True).set_index(keys=["marketId"])
         return prices
 
@@ -30,7 +30,7 @@ class Data(DataAbstract):
         """
         paired_order = self._get_paired_order_dict()
         with ThreadPoolExecutor(max_workers=10) as pool:
-            resp = list(pool.map(lambda args: args[1].get_orderbook_for_pair(args[0]), list(paired_order.items())))
+            resp = list(pool.map(lambda args: args[1](args[0]).get_orderbook_for_pair(), list(paired_order.items())))
         return resp
 
     def _get_paired_order_dict(self):

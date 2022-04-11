@@ -31,8 +31,11 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
         trades_log = obj3.get_trade_logs
 
         ## Print statements
-        print(trades_log.iloc[:, :5])
+        # print(trio_prices)
         print()
+        if (trades_log["profit"] > 0).any():
+            print(trades_log.iloc[:, :5])
+            print()
         i += 1
         time.sleep(run_interval)
 
@@ -44,4 +47,4 @@ if __name__ == "__main__":
         "BTC_SGD": IndependentReserve
     }
 
-    run_surface_arb(cur_dict1)
+    run_surface_arb(cur_dict1, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=3600)

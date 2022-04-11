@@ -8,6 +8,10 @@ pd.set_option('display.max_columns', 20)
 class IndependentReserve:
     BASE_URL = "https://api.independentreserve.com/Public"
 
+    def __init__(self, market_id: str):
+        self.market_id = IndependentReserve._validate_currency_pair(market_id)
+        self._check_currency_exists()
+
     @staticmethod
     def get_coins_tradeable():
         """
@@ -16,32 +20,29 @@ class IndependentReserve:
         coins_tradeable = IndependentReserve._coins_tradeable()
         return coins_tradeable
 
-    @staticmethod
-    def get_details_for_pair(market_id: str, as_dict: bool = False):
+    def get_details_for_pair(self, as_dict: bool = False):
         """
         Get the base and quote currencies
         """
-        pair_details = IndependentReserve._details_for_pair(market_id=market_id)
+        pair_details = self._details_for_pair()
         if as_dict:
             return pair_details.to_dict(orient='list')
         return pair_details
 
-    @staticmethod
-    def get_price_for_pair(market_id: str, as_dict: bool = False):
+    def get_price_for_pair(self, as_dict: bool = False):
         """
         Pull prices for pair from the respective API
         """
-        price = IndependentReserve._price_for_pair(market_id)
+        price = self._price_for_pair()
         if as_dict:
             return price.to_dict('list')
         return price
 
-    @staticmethod
-    def get_orderbook_for_pair(market_id: str, as_dict=False):
+    def get_orderbook_for_pair(self, as_dict=False):
         """
         Pull order book data for pair
         """
-        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = IndependentReserve._orderbook_for_pair(market_id=market_id)
+        market_id, timestamp, bid_price, bid_qty, ask_price, ask_qty = self._orderbook_for_pair()
         orderbook = pd.DataFrame({
             "market_id": market_id,
             "timestamp": timestamp,
@@ -71,16 +72,21 @@ class IndependentReserve:
                            for quote in secondary_currency]
         return coins_tradeable
 
-    @staticmethod
-    def _check_currency_exists(market_id: str):
-        market_id = IndependentReserve._validate_currency_pair(market_id)
+    def _check_currency_exists(self):
         coins_tradeable = IndependentReserve._coins_tradeable()
-        if market_id not in coins_tradeable:
-            raise ValueError(f"Pair {market_id} does not exist in IndependentReserve.")
+        if self.market_id not in coins_tradeable:
+            raise ValueError(f"Pair {self.market_id} does not exist in IndependentReserve.")
 
-    @staticmethod
-    def _details_for_pair(market_id: str):
-        IndependentReserve._check_currency_exists(market_id)
+    def _replace_XBT_with_BTC(self):
+        market_id = ""
+        if self.market_id.split("_")[0] == "XBT":
+            market_id = "BTC" + "_" + self.market_id.split("_")[1]
+        elif self.market_id.split("_")[1] == "XBT":
+            market_id = self.market_id.split("_")[0] + "_" + "BTC"
+        return market_id
+
+    def _details_for_pair(self):
+        market_id = self._replace_XBT_with_BTC()
         pair_details = pd.DataFrame({
             "marketId": market_id,
             "baseAssetName": market_id.split("_")[0],
@@ -89,21 +95,16 @@ class IndependentReserve:
         }, index=[0])
         return pair_details
 
-    @staticmethod
-    def _price_for_pair_url(market_id: str):
-        IndependentReserve._check_currency_exists(market_id)
-        market_id = IndependentReserve._validate_currency_pair(market_id)
-        base, quote = market_id.split("_")[0].capitalize(), market_id.split("_")[1]
-
+    def _price_for_pair_url(self):
+        base, quote = self.market_id.split("_")[0].capitalize(), self.market_id.split("_")[1]
         req_url = IndependentReserve.BASE_URL + f'/GetMarketSummary?primaryCurrencyCode={base}&secondaryCurrencyCode={quote}'
         return req_url, base, quote
 
-    @staticmethod
-    def _price_for_pair(market_id: str):
-        req_url, base, quote = IndependentReserve._price_for_pair_url(market_id)
+    def _price_for_pair(self):
+        req_url, base, quote = self._price_for_pair_url()
         req = requests.get(req_url)
         price = pd.json_normalize(json.loads(req.text))
-
+        market_id = self._replace_XBT_with_BTC()
         price = pd.DataFrame({
             "marketId": market_id,
             "bestBid": float(price["CurrentHighestBidPrice"]),
@@ -119,23 +120,20 @@ class IndependentReserve:
 
         return price[["marketId", "bestBid", "bestAsk", "timestamp"]]
 
-    @staticmethod
-    def _orderbook_for_pair_url(market_id: str):
-        IndependentReserve._check_currency_exists(market_id)
-        market_id = IndependentReserve._validate_currency_pair(market_id)
-        base, quote = market_id.split("_")[0], market_id.split("_")[1]
+    def _orderbook_for_pair_url(self):
+        base, quote = self.market_id.split("_")[0], self.market_id.split("_")[1]
         req_url = IndependentReserve.BASE_URL + f'/GetOrderBook?primaryCurrencyCode={base}&secondaryCurrencyCode={quote}'
         return req_url, base, quote
 
-    @staticmethod
-    def _orderbook_for_pair(market_id: str):
-        req_url, base, quote = IndependentReserve._orderbook_for_pair_url(market_id)
+    def _orderbook_for_pair(self):
+        req_url, base, quote = self._orderbook_for_pair_url()
         json_resp = json.loads(requests.get(req_url).text)
         timestamp = datetime.utcnow()
         ask_price = [float(x["Price"]) for x in json_resp["BuyOrders"]][:50]
         ask_qty = [float(x["Volume"]) for x in json_resp["BuyOrders"]][:50]
         bid_price = [float(x["Price"]) for x in json_resp["SellOrders"]][:50]
         bid_qty = [float(x["Volume"]) for x in json_resp["SellOrders"]][:50]
+        market_id = self._replace_XBT_with_BTC()
         return market_id, timestamp, ask_price, ask_qty, bid_price, bid_qty
 
     @staticmethod
@@ -156,14 +154,19 @@ if __name__ == "__main__":
     # coins_trade = IndependentReserve.get_coins_tradeable()
     # print(coins_trade)
 
-    # btc_sgd_df = IndependentReserve.get_details_for_pair("XBT_SGD")
-    # btc_sgd_dict = IndependentReserve.get_details_for_pair("XBT_SGD", as_dict=True)
-    # print(btc_sgd_df)
+    obj = IndependentReserve("BTC_SGD")
 
-    # btc_sgd_price = IndependentReserve.get_price_for_pair("XBT_SGD")
-    # btc_sgd_price_dict = IndependentReserve.get_price_for_pair("XBT_SGD", as_dict=True)
-    # print(btc_sgd_price)
+    btc_sgd_df = obj.get_details_for_pair()
+    btc_sgd_dict = obj.get_details_for_pair(as_dict=True)
+    print(btc_sgd_df)
+    print(btc_sgd_dict)
 
-    btc_aud_ob = IndependentReserve.get_orderbook_for_pair("XBT_SGD")
-    btc_aud_ob_dict = IndependentReserve.get_orderbook_for_pair("XBT_SGD", as_dict=True)
+    btc_sgd_price = obj.get_price_for_pair()
+    btc_sgd_price_dict = obj.get_price_for_pair(as_dict=True)
+    print(btc_sgd_price)
+    print(btc_sgd_price_dict)
+
+    btc_aud_ob = obj.get_orderbook_for_pair()
+    btc_aud_ob_dict = obj.get_orderbook_for_pair(as_dict=True)
     print(btc_aud_ob)
+    print(btc_aud_ob_dict)
