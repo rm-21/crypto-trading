@@ -3,7 +3,7 @@ from modules.strategy.conversion import Conversion
 from modules.strategy.conversion_direction import Graph
 
 
-class SurfaceArb:
+class Arbitrage:
     def __init__(self, trio_details: pd.DataFrame, trio_prices: pd.DataFrame, init_amount: float, init_currency: str):
         self.trio_details = trio_details
         self.trio_prices = trio_prices
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     trio_prices = obj2.get_price_for_trio()
 
     ## Check for Surface Arbitrage
-    obj3 = SurfaceArb(trio_details, trio_prices, 100000, "AUD")
+    obj3 = Arbitrage(trio_details, trio_prices, 100000, "AUD")
 
     ## Print statements
     # print(trio_prices)

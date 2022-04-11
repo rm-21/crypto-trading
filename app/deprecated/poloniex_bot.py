@@ -5,7 +5,7 @@ from pprint import pprint
 sys.path.append("../..")
 from modules.data.deprecated.poloniex.poloniex_api import Poloniex as pl
 from modules.strategy.deprecated.identify_pairs import IdentifyPairs
-from modules.strategy.surface_arb import SurfaceArb
+from modules.strategy.surface_arb import Arbitrage
 
 coin_price_url = "https://poloniex.com/public?command=returnTicker"
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         ## Trio details
         trio_details = data_obj.get_details_for_trio(trio)
         trio_prices = data_obj.get_price_for_trio(trio)
-        obj1 = SurfaceArb(trio, trio_prices, 10000, "USDT")
+        obj1 = Arbitrage(trio, trio_prices, 10000, "USDT")
         pprint(obj1.get_trade_logs)
         time.sleep(1)
         print()

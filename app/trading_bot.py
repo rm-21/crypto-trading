@@ -6,7 +6,7 @@ from modules.data.platform.independent_reserve import IndependentReserve
 from modules.data.platform.oanda import Oanda
 from modules.data.data_api import Data
 from modules.strategy.identify_pairs import IdentifyPairs
-from modules.strategy.surface_arb import SurfaceArb
+from modules.strategy.surface_arb import Arbitrage
 
 """
 <Base>_<Quote>
@@ -28,7 +28,7 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
         trio_prices = obj2.get_price_for_trio()
 
         ## Check for Surface Arbitrage
-        obj3 = SurfaceArb(trio_details, trio_prices, init_amount, init_cur)
+        obj3 = Arbitrage(trio_details, trio_prices, init_amount, init_cur)
         trades_log = obj3.get_trade_logs
 
         ## Print statements
