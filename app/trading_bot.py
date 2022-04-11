@@ -19,11 +19,12 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
     obj1 = IdentifyPairs(paired_order=currency_dict)
     trio_details = obj1.get_tradeable_trio
 
+    obj2 = Data(trio_details)
+
     i = 0
     while i < max_duration:
         print(f"{i + 1}: {datetime.datetime.now()}")
         ## Get data for TRIO based on details
-        obj2 = Data(trio_details)
         trio_prices = obj2.get_price_for_trio()
 
         ## Check for Surface Arbitrage
@@ -31,7 +32,7 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
         trades_log = obj3.get_trade_logs
 
         ## Print statements
-        # print(trio_prices)
+        print(trio_prices)
         print()
         if (trades_log["profit"] > 0).any():
             print(trades_log.iloc[:, :5])
