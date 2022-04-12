@@ -143,11 +143,11 @@ The output trades log gets saved along with the prices in a separate local folde
 | index    | new_amount    | denomination | swap_rate    | direction  | profit      | percent   |
 |----------|---------------|--------------|--------------|------------|-------------|-----------|
 | 0_trade1 | 1.846431      | BTC          | 0.000018     | AUD to BTC | 0           | 0         |
-| 0_trade1 | 101144.270349 | SGD          | 54778.250000 | BTC to SGD | 0           | 0         |
-| 0_trade1 | 99690.778794  | AUD          | 0.985630     | SGD to AUD | -309.221206 | -0.003092 |
-| 0_trade1 | 101447.000000 | SGD          | 1.014470     | AUD to SGD | 0           | 0         |
-| 0_trade1 | 1.844609      | BTC          | 0.000018     | SGD to BTC | 0           | 0         |
-| 0_trade1 | 99709.710385  | AUD          | 54054.660000 | BTC to AUD | -290.289615 | -0.002903 |
+| 0_trade2 | 101144.270349 | SGD          | 54778.250000 | BTC to SGD | 0           | 0         |
+| 0_trade3 | 99690.778794  | AUD          | 0.985630     | SGD to AUD | -309.221206 | -0.003092 |
+| 1_trade1 | 101447.000000 | SGD          | 1.014470     | AUD to SGD | 0           | 0         |
+| 1_trade2 | 1.844609      | BTC          | 0.000018     | SGD to BTC | 0           | 0         |
+| 1_trade3 | 99709.710385  | AUD          | 54054.660000 | BTC to AUD | -290.289615 | -0.002903 |
 
 ## Current Potential
 1. You can add any exchange of your choice under `modules\data\platform`. Refer to any of the existing exchange codes
