@@ -75,4 +75,61 @@ and stored. The difference in seconds and milliseconds that you see is because o
 
 **Step 3:**<br>
 **Arbitrage Opportunity:**<br>
-With the above price dataframe, we now have all the information for an arbitrage.
+With the above price dataframe, we now have all the information for an arbitrage.<br>
+
+**Method `get_trade_logs`**:
+This method does many things in a step-wise manner to simulate and check for an arbitrage opportunity. Let us go through
+all of them:
+
+1. **Conversion Direction**: It creates a cyclic graph, with edges as the currency in each pair. The `get_paths` method
+in `conversion_direction.py` outputs the following result: 
+```python
+paths = [['AUD', 'BTC', 'SGD', 'AUD'], ['AUD', 'SGD', 'BTC', 'AUD']]
+```
+What this shows if you initially have AUD and want to do an arbitrage, you have two ways to do it:
+* **Path1**: AUD --> BTC --> SGD --> AUD
+* **Path2**: AUD --> SGD --> BTC --> AUD
+
+2. **Conversion Params**: Depending on the currency pair we have, a list of dictionaries, containing the conversion rate and direction, as 
+follows will be created:
+```python
+quotes_to_use = [
+    [{'ask': 53996.2,
+   'base_currency': 'BTC',
+   'bid': 53862.7,
+   'direction': 'reverse',
+   'quote_currency': 'AUD'},
+  {'ask': 54817.71,
+   'base_currency': 'BTC',
+   'bid': 54611.82,
+   'direction': 'forward',
+   'quote_currency': 'SGD'},
+  {'ask': 1.01521,
+   'base_currency': 'AUD',
+   'bid': 1.0151,
+   'direction': 'reverse',
+   'quote_currency': 'SGD'}],
+ [{'ask': 1.01521,
+   'base_currency': 'AUD',
+   'bid': 1.0151,
+   'direction': 'forward',
+   'quote_currency': 'SGD'},
+  {'ask': 54817.71,
+   'base_currency': 'BTC',
+   'bid': 54611.82,
+   'direction': 'reverse',
+   'quote_currency': 'SGD'},
+  {'ask': 53996.2,
+   'base_currency': 'BTC',
+   'bid': 53862.7,
+   'direction': 'forward',
+   'quote_currency': 'AUD'}]
+]
+```
+
+3. **Conversion**: The items in `quotes_to_use` list will be passed as params to the function `currency_conversion` in
+`conversion.py` module. The function calculates the correct swap rate based on the `direction` parameter.<br><br>
+If you look carefully, each dictionary in the first list is a single iteration or conversion.<br><br>
+Using that as a reference, we calculate the potential profit/loss for each of the two paths in point 1, as if the trade 
+was taken. The details are added to the `TRADES_LOG` variable of the object, which is the output of the `get_trade_logs`
+method.
