@@ -1,18 +1,26 @@
 import datetime
 import time
-
+import pandas as pd
+import os
 from modules.data.platform.btcmarkets import BTCMarkets
 from modules.data.platform.independent_reserve import IndependentReserve
 from modules.data.platform.oanda import Oanda
 from modules.data.data_api import Data
 from modules.strategy.identify_pairs import IdentifyPairs
-from modules.strategy.surface_arb import Arbitrage
+from modules.strategy.arbitrage import Arbitrage
 
 """
 <Base>_<Quote>
 1 Base = 'x' Quote
 """
 
+def save_price_trade(timestamp, prices, trade_logs, path="..\\storage\\trade"):
+    dir_ = path + f"\\{timestamp}"
+    if not os.path.exists(dir_):
+        os.makedirs(dir_)
+
+    prices.to_csv(f"{path}\\{timestamp}\\prices.csv")
+    trade_logs.to_csv(f"{path}\\{timestamp}\\trade_logs.csv")
 
 def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=30):
     ## Trio details
@@ -23,18 +31,23 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
 
     i = 0
     while i < max_duration:
-        print(f"{i + 1}: {datetime.datetime.now()}")
+        timestamp = datetime.datetime.now()
+        print(f"{i + 1}: {timestamp}")
         ## Get data for TRIO based on details
         trio_prices = obj2.get_price_for_trio()
 
         ## Check for Surface Arbitrage
         obj3 = Arbitrage(trio_details, trio_prices, init_amount, init_cur)
-        trades_log = obj3.get_trade_logs
+        trades_log = obj3.get_trade_logs()
+
+        ## Save
+        save_price_trade(timestamp.timestamp(), trio_prices, trades_log)
 
         ## Print statements
         print(trio_prices)
         print()
         if (trades_log["profit"] > 0).any():
+            print("TRADE LOGS")
             print(trades_log.iloc[:, :5])
             print()
         i += 1

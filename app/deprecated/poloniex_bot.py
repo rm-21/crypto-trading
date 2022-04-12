@@ -5,7 +5,7 @@ from pprint import pprint
 sys.path.append("../..")
 from modules.data.deprecated.poloniex.poloniex_api import Poloniex as pl
 from modules.strategy.deprecated.identify_pairs import IdentifyPairs
-from modules.strategy.surface_arb import Arbitrage
+from modules.strategy.arbitrage import Arbitrage
 
 coin_price_url = "https://poloniex.com/public?command=returnTicker"
 

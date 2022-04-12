@@ -14,7 +14,6 @@ class Arbitrage:
         self.init_currency = init_currency
         self.TRADES_LOG = pd.DataFrame(columns=["new_amount", "denomination", "swap_rate", "direction", "profit", "percent"])
         
-    @property
     def get_trade_logs(self):
         self._get_surface_arb()
 
@@ -126,7 +125,7 @@ if __name__ == "__main__":
     # print(Graph(trio_details, "AUD").get_paths())
     # print()
     # pprint(obj3._get_quote_to_use())
-    print(obj3.get_trade_logs)
+    print(obj3.get_trade_logs())
 
     # print(BTCMarkets.get_coins_tradeable())
     # print(IndependentReserve.get_coins_tradeable())
