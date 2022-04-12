@@ -1,6 +1,5 @@
 import datetime
 import time
-import pandas as pd
 import os
 from modules.data.platform.btcmarkets import BTCMarkets
 from modules.data.platform.independent_reserve import IndependentReserve
@@ -22,7 +21,8 @@ def save_price_trade(timestamp, prices, trade_logs, path="..\\storage\\trade"):
     prices.to_csv(f"{path}\\{timestamp}\\prices.csv")
     trade_logs.to_csv(f"{path}\\{timestamp}\\trade_logs.csv")
 
-def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=30):
+def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=30,
+                    path="..\\storage\\trade"):
     ## Trio details
     obj1 = IdentifyPairs(paired_order=currency_dict)
     trio_details = obj1.get_tradeable_trio
@@ -41,7 +41,7 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
         trades_log = obj3.get_trade_logs()
 
         ## Save
-        save_price_trade(timestamp.timestamp(), trio_prices, trades_log)
+        save_price_trade(timestamp.timestamp(), trio_prices, trades_log, path=path)
 
         ## Print statements
         print(trio_prices)
@@ -61,4 +61,15 @@ if __name__ == "__main__":
         "BTC_SGD": IndependentReserve
     }
 
-    run_surface_arb(cur_dict1, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=3600)
+    run_surface_arb(cur_dict1, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=3600,
+                    path="..\\storage\\trade\\AUD_SGD_BTC")
+
+    # cur_dict2 = {
+    #     "AUD_USD": Oanda,
+    #     "BTC_AUD": BTCMarkets,
+    #     "BTC_USD": IndependentReserve
+    # }
+    #
+    # run_surface_arb(cur_dict2, init_amount=50000, init_cur="USD", run_interval=1, max_duration=3600,
+    #                 path="..\\storage\\trade\\AUD_USD_BTC")
+
