@@ -42,7 +42,7 @@ currency_dict = {
 This parameter should contain the currency pair and the exchange on which the said pair trades. For example, BTC_SGD
 trades on BTCMarkets.
 
-**Step 1:**<br>
+### Step 1:
 Initialise the `IdentifyPairs` object. When initialised, the following happens:
 * **Exchange objects for each currency pair** that will help you pull the data for that pair get created.
   * Checks whether currency pair formats are valid or not.
@@ -58,7 +58,7 @@ Initialise the `IdentifyPairs` object. When initialised, the following happens:
 You get a `pandas` dataframe with the above details. The `exchange_obj` column contains the object from which data for 
 each pair will be pulled.
 
-**Step 2:**<br>
+### Step 2
 **Price for Trio**: With these details, you pass them to the `Data` object. The object has a method `get_price_for_trio`, which pulls the price for each pair using a `ThreadPoolExecutor`. It acts as an API, so that you don't have to call the prices for each pair individually. Under the hood, it is using the `get_price_for_pair` method for each currency pair.
 It returns the following dataframe:
 
@@ -73,7 +73,7 @@ and stored. The difference in seconds and milliseconds that you see is because o
 - `ThreadPoolExecutor`: Is not a substitute for parallel computing. It just optimises the resources.
 - `IndependentReserve`: The independent reserve exchange API is slightly slower than that of Oanda and BTCMarkets.
 
-**Step 3:**<br>
+### Step 3
 **Arbitrage Opportunity:**<br>
 With the above price dataframe, we now have all the information for an arbitrage.<br>
 
@@ -133,3 +133,8 @@ If you look carefully, each dictionary in the first list is a single iteration o
 Using that as a reference, we calculate the potential profit/loss for each of the two paths in point 1, as if the trade 
 was taken. The details are added to the `TRADES_LOG` variable of the object, which is the output of the `get_trade_logs`
 method.
+
+
+### Step 4
+The output trades log gets saved along with the prices in a separate local folder of your choice using the 
+`save_price_trade` function. In addition, any profitable opportunity when identified gets printed out to the console.
