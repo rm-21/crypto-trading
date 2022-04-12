@@ -138,3 +138,20 @@ method.
 ### Step 4
 The output trades log gets saved along with the prices in a separate local folder of your choice using the 
 `save_price_trade` function. In addition, any profitable opportunity when identified gets printed out to the console.
+
+## Current Potential
+1. You can add any exchange of your choice under `modules\data\platform`. Refer to any of the existing exchange codes
+for the class schema. If consistent, then you can run the arbitrage with the exchange of your choice, by modifying the 
+`currency_dict`.
+2. You can trade any pair in the current exchanges by simply modifying the currencies in `currency_dict`. Errors will be
+raised if currencies don't exist or are not tradeable. 
+3. The code is scalable as a scanner for arbitrage. Runs have revealed that when an opportunity arises, it stays from
+30 seconds to a few minutes before being filled.
+
+## Way Forward
+1. Add support for exchanges that use the opposite currency format.
+2. Reduce latency by using websockets. Currently, not added because, Independent Reserve websockets feed individual
+changes in the orderbook and would require orderbook construction at specified intervals. The task was beyond the
+current project scope.
+3. Fetch round-off figures from the exchanges, to avoid order rejection issues in live mode (TBD).
+4. Verify market depth for appropriate position sizing and avoiding extremely illiquid markets.
