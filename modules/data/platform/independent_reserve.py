@@ -83,6 +83,8 @@ class IndependentReserve:
             market_id = "BTC" + "_" + self.market_id.split("_")[1]
         elif self.market_id.split("_")[1] == "XBT":
             market_id = self.market_id.split("_")[0] + "_" + "BTC"
+        else:
+            market_id = self.market_id
         return market_id
 
     def _details_for_pair(self):
@@ -110,8 +112,8 @@ class IndependentReserve:
             "bestBid": float(price["CurrentHighestBidPrice"]),
             "bestAsk": float(price["CurrentLowestOfferPrice"]),
             "lastPrice": float(price["LastPrice"]),
-            "volume24h": float(price[f"DayVolume{base}"]),
-            "volumeQte24h": float(price[f"DayVolume{base}InSecondaryCurrrency"]),
+            "volume24h": float(price[f"DayVolumeXbt"]),
+            "volumeQte24h": float(price[f"DayVolumeXbtInSecondaryCurrrency"]),
             "price24h": float(price["DayAvgPrice"]),
             "low24h": float(price["DayLowestPrice"]),
             "high24h": float(price["DayHighestPrice"]),
@@ -155,6 +157,7 @@ if __name__ == "__main__":
     # print(coins_trade)
 
     obj = IndependentReserve("BTC_SGD")
+    # obj = IndependentReserve("ETH_USD")
 
     btc_sgd_df = obj.get_details_for_pair()
     btc_sgd_dict = obj.get_details_for_pair(as_dict=True)

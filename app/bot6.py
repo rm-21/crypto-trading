@@ -55,14 +55,14 @@ def run_surface_arb(currency_dict: dict, init_amount=60000, init_cur="AUD", run_
 
 
 if __name__ == "__main__":
-    cur_dict1 = {
-        "AUD_SGD": Oanda,
-        "BTC_AUD": BTCMarkets,
-        "BTC_SGD": IndependentReserve
-    }
-
-    run_surface_arb(cur_dict1, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=30000,
-                    path="..\\storage\\trade\\AUD_SGD_BTC")
+    # cur_dict1 = {
+    #     "AUD_SGD": Oanda,
+    #     "BTC_AUD": BTCMarkets,
+    #     "BTC_SGD": IndependentReserve
+    # }
+    #
+    # run_surface_arb(cur_dict1, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=3600,
+    #                 path="..\\storage\\trade\\AUD_SGD_BTC")
 
     # cur_dict2 = {
     #     "AUD_USD": Oanda,
@@ -73,3 +73,12 @@ if __name__ == "__main__":
     # run_surface_arb(cur_dict2, init_amount=50000, init_cur="USD", run_interval=1, max_duration=3600,
     #                 path="..\\storage\\trade\\AUD_USD_BTC")
 
+    cur_dict3 = {
+        "AUD_SGD": Oanda,
+        "LTC_AUD": BTCMarkets,
+        "LTC_SGD": IndependentReserve
+    }
+
+    run_surface_arb(cur_dict3, init_amount=60000, init_cur="AUD", run_interval=1, max_duration=30000,
+                    path="..\\storage\\trade\\AUD_SGD_LTC")
+    # print(BTCMarkets.get_coins_tradeable())
