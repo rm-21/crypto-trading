@@ -5,6 +5,9 @@
 The project aims to implement a triangular arbitrage strategy. It currently is limited only to the Australian crypto 
 exchanges. The arbitrage is as follows:
 
+## Sample Analysis of the `AUD`, `SGD`, `XRP` trio
+[Link to the Analysis](https://github.com/rm-21/crypto-trading/blob/main/analysis/trade_analysis_XRP.ipynb) 
+
 ### How to Run
 1. Clone the project on your local system.
 2. Create a conda environment using the `.yml` file.
