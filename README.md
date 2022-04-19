@@ -8,7 +8,7 @@ exchanges. The arbitrage is as follows:
 ## Sample Analysis of the `AUD`, `SGD`, `XRP` trio
 [Link to the Analysis](https://github.com/rm-21/crypto-trading/blob/main/analysis/trade_analysis_XRP.ipynb) 
 
-### How to Run
+## How to Run
 1. Clone the project on your local system.
 2. Create a conda environment using the `.yml` file.
 3. Navigate to `crypto-trading/app/trading_bot.py`
@@ -22,12 +22,12 @@ exchanges. The arbitrage is as follows:
       5. `path`: the path on your local system to store the log files
    3. Run the `trading_bot.py` file in a terminal or IDE of your choice.
 
-### Currency Pairs
+## Currency Pairs
 * Fiat (traditional) currency - *AUD* - Australian Dollar
 * Fiat (traditional) currency - *Any* - Like *SGD*, *USD*, etc.
 * Cryptocurrency - *Any* - Like *BTC*, *ETH*, etc.
 
-### Currency Format
+## Currency Format
 Any exchange that you use must have this quotes format: `BaseCurrency_QuoteCurrency`
 
 ## Code Flow
